@@ -1,0 +1,1840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#100d0b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Big Screen">
+<meta name="description" content="Track your way through the IMDb Top 250 with ratings, notes, and watch dates.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>The Big Screen — Top 250 Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #100d0b;
+    --bg-raised: #1a1512;
+    --bg-raised-2: #221b16;
+    --film: #2a221b;
+    --gold: #d4a94a;
+    --gold-dim: #8f7638;
+    --crimson: #a8352a;
+    --crimson-bright: #d1493c;
+    --cream: #ece3d2;
+    --cream-dim: #beb2a0;
+    --muted: #a99b87;
+    --muted2: #7c7264;
+    --border: #332a22;
+    --border-soft: #241d18;
+    --focus: #e8c874;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --display: 'Bebas Neue', Impact, sans-serif;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 900px 500px at 50% -10%, rgba(212,169,74,0.08), transparent 60%),
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+    color: var(--cream);
+    font-family: var(--sans);
+    padding: 0 0 calc(80px + env(safe-area-inset-bottom));
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+    min-height: 100vh;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  ::selection { background: var(--gold); color: #100d0b; }
+
+  a { color: inherit; }
+
+  *:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* ===== MARQUEE HEADER ===== */
+  .marquee {
+    position: relative;
+    padding: 22px 14px 18px;
+    padding-top: calc(22px + env(safe-area-inset-top));
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background:
+      linear-gradient(180deg, rgba(212,169,74,0.06), transparent 70%);
+    overflow: hidden;
+  }
+  .marquee::before, .marquee::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 14px;
+    background-image: radial-gradient(circle, var(--gold-dim) 2px, transparent 2.4px);
+    background-size: 14px 22px;
+    background-position: center;
+    opacity: 0.35;
+  }
+  .marquee::before { left: 4px; }
+  .marquee::after { right: 4px; }
+
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 10.5px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  h1 {
+    font-family: var(--display);
+    font-weight: 400;
+    font-size: 38px;
+    letter-spacing: 0.03em;
+    line-height: 1;
+    margin: 0;
+    color: var(--gold);
+    text-shadow: 0 0 24px rgba(212,169,74,0.35), 0 2px 0 rgba(0,0,0,0.4);
+  }
+  .subtitle {
+    font-family: var(--serif);
+    font-style: italic;
+    color: var(--cream-dim);
+    font-size: 14.5px;
+    margin-top: 6px;
+  }
+
+  /* ===== FILMSTRIP PROGRESS ===== */
+  .strip-wrap {
+    max-width: 640px;
+    margin: 16px auto 0;
+    padding: 0 14px;
+  }
+  .strip {
+    position: relative;
+    height: 34px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+  }
+  .strip-fill {
+    position: absolute;
+    inset: 0;
+    width: 0%;
+    background: linear-gradient(90deg, var(--crimson) 0%, var(--gold) 100%);
+    transition: width 0.6s cubic-bezier(.22,1,.36,1);
+  }
+  .strip-holes {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 6px;
+    pointer-events: none;
+  }
+  .strip-holes span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--bg);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.3);
+    flex-shrink: 0;
+  }
+  .strip-label {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    font-family: var(--display);
+    letter-spacing: 0.08em;
+    font-size: 15px;
+    color: var(--cream);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    z-index: 2;
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+  .stat {
+    text-align: center;
+  }
+  .stat-num {
+    font-family: var(--display);
+    font-size: 22px;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .stat-lbl {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-top: 3px;
+  }
+
+  /* ===== CONTROLS ===== */
+  .sticky-bar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(16,13,11,0.92);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-soft);
+    padding-bottom: 10px;
+    padding-top: 10px;
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+    transition: box-shadow 0.2s ease;
+  }
+  .sticky-bar.scrolled {
+    box-shadow: 0 8px 20px rgba(0,0,0,0.35);
+  }
+
+  .controls {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 14px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .search-box {
+    position: relative;
+    flex: 1 1 100%;
+  }
+  .search-box svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+  input[type="search"] {
+    width: 100%;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    padding: 12px 34px 12px 36px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: var(--sans);
+    transition: border-color 0.15s ease, background 0.15s ease;
+    min-height: 44px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
+  input[type="search"]::placeholder { color: var(--muted2); }
+  input[type="search"]:focus { border-color: var(--gold-dim); background: var(--bg-raised-2); }
+
+  select {
+    flex: 1 1 100%;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    padding: 11px 10px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: var(--sans);
+    cursor: pointer;
+    min-height: 44px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  @media (min-width: 460px) {
+    .search-box { flex: 1 1 200px; }
+    select { flex: 0 1 170px; }
+  }
+
+  .chip-row {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 8px 14px 0;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-family: var(--sans);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+    min-height: 38px;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .chip:active { transform: scale(0.96); }
+  .chip:hover { border-color: var(--gold-dim); color: var(--cream); }
+  .chip.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #100d0b;
+    font-weight: 700;
+  }
+
+  .chip.chip-add {
+    margin-left: auto;
+    border-color: var(--gold-dim);
+    color: var(--gold);
+  }
+  .chip.chip-add.active { background: var(--gold); color: #100d0b; }
+
+  .add-form {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 0 14px;
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    gap: 0;
+    transition: grid-template-rows 0.28s cubic-bezier(.22,1,.36,1), opacity 0.22s ease, margin-top 0.28s ease;
+  }
+  .add-form > .add-form-inner {
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-height: 0;
+  }
+  .add-form.open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+    margin-top: 8px;
+  }
+  .add-form input[type="text"] {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: var(--sans);
+    min-height: 42px;
+  }
+  .add-form input[type="text"]:focus { border-color: var(--gold-dim); }
+  #addTitle { flex: 1 1 160px; }
+  #addYear { flex: 0 1 80px; }
+  #addBtn {
+    flex: 0 0 auto;
+    background: var(--gold);
+    color: #100d0b;
+    border: none;
+    font-weight: 700;
+    font-size: 14px;
+    font-family: var(--sans);
+    padding: 10px 18px;
+    border-radius: 10px;
+    min-height: 42px;
+    cursor: pointer;
+  }
+  #addBtn:active { transform: scale(0.97); }
+
+  /* ===== LIST ===== */
+  .list {
+    max-width: 640px;
+    margin: 14px auto 0;
+    padding: 0 14px;
+  }
+
+  .decade-header {
+    font-family: var(--display);
+    letter-spacing: 0.1em;
+    font-size: 13px;
+    color: var(--gold-dim);
+    margin: 22px 0 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .decade-header:first-child { margin-top: 0; }
+
+  .item {
+    position: relative;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 7px;
+    display: flex;
+    align-items: stretch;
+    min-height: 58px;
+    overflow: hidden;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    animation: fadeSlideIn 0.28s cubic-bezier(.22,1,.36,1) backwards;
+    content-visibility: auto;
+    contain-intrinsic-size: 60px;
+  }
+  .item:hover { border-color: #453a2d; }
+  .item:active { transform: scale(0.995); }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .item.done {
+    background: linear-gradient(90deg, rgba(168,53,42,0.14), var(--bg-raised) 40%);
+    border-color: rgba(168,53,42,0.35);
+  }
+
+  .check-zone {
+    display: flex;
+    align-items: center;
+    padding: 0 2px 0 8px;
+  }
+  .check-btn {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .check-btn .ring {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s cubic-bezier(.34,1.56,.64,1);
+  }
+  .check-btn:active .ring { transform: scale(0.88); }
+  .check-btn svg {
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.15s ease, transform 0.2s cubic-bezier(.34,1.56,.64,1);
+  }
+  .check-btn.checked .ring {
+    background: var(--crimson);
+    border-color: var(--crimson-bright);
+    transform: scale(1.06);
+  }
+  .check-btn.checked svg { opacity: 1; transform: scale(1); }
+  .check-btn.pulse .ring { animation: pulseCheck 0.4s ease; }
+  @keyframes pulseCheck {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.3); }
+    100% { transform: scale(1.06); }
+  }
+
+  .rank-badge {
+    font-family: var(--display);
+    font-size: 12px;
+    color: var(--muted2);
+    display: flex;
+    align-items: center;
+    padding: 0 8px;
+    min-width: 30px;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+  }
+  .rank-badge.custom {
+    color: var(--gold);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  .remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted2);
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: color 0.15s ease;
+  }
+  .remove-btn:active { color: var(--crimson-bright); transform: scale(0.9); }
+  .remove-btn:hover { color: var(--crimson-bright); }
+
+  .detail-toggle {
+    background: transparent;
+    border: none;
+    color: var(--muted2);
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+  .detail-toggle.active { color: var(--gold); }
+  .detail-toggle:active { transform: scale(0.9); }
+
+  .mini-preview {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+  }
+  .mini-stars {
+    color: var(--gold);
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+  .mini-note {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 11.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .detail-panel {
+    background: var(--bg-raised-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    margin: -3px 0 7px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    animation: fadeSlideIn 0.22s cubic-bezier(.22,1,.36,1);
+  }
+  .detail-label {
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .stars { display: flex; gap: 2px; }
+  .star-btn {
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--border);
+    touch-action: manipulation;
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: color 0.12s ease, transform 0.12s ease;
+  }
+  .star-btn.filled { color: var(--gold); }
+  .star-btn:active { transform: scale(0.82); }
+  .note-textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--cream);
+    font-family: var(--sans);
+    font-size: 16px;
+    padding: 9px 11px;
+    resize: vertical;
+    min-height: 56px;
+    line-height: 1.4;
+  }
+  .note-textarea:focus { border-color: var(--gold-dim); }
+  .note-textarea::placeholder { color: var(--muted2); }
+
+  .info {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+  }
+  .title {
+    font-family: var(--serif);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.3;
+    color: var(--cream);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .item.done .title { color: #e6c9c3; }
+  .year {
+    font-size: 11.5px;
+    color: var(--muted2);
+    font-family: var(--sans);
+  }
+
+  .stub {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    border-left: 1px dashed var(--border);
+    padding: 0 8px 0 10px;
+    position: relative;
+    min-height: 44px;
+  }
+  .stub::before, .stub::after {
+    content: '';
+    position: absolute;
+    left: -5px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--bg);
+  }
+  .stub::before { top: -1px; }
+  .stub::after { bottom: -1px; }
+
+  .date-input {
+    background: transparent;
+    border: none;
+    color: var(--gold);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 16px;
+    width: 0;
+    padding: 4px 0;
+    cursor: pointer;
+    opacity: 0;
+    max-width: 0;
+    transition: opacity 0.25s ease, max-width 0.25s ease, width 0.25s ease;
+  }
+  .item.done .date-input { opacity: 1; max-width: 128px; width: 128px; }
+  .date-input:disabled { color: var(--muted2); }
+  .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.7) sepia(1) saturate(3) hue-rotate(0deg);
+    opacity: 0.7;
+    cursor: pointer;
+    padding: 6px;
+    margin-right: -6px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--muted2);
+  }
+  .empty-state .glyph {
+    font-family: var(--display);
+    font-size: 40px;
+    color: var(--gold-dim);
+    margin-bottom: 6px;
+  }
+  .empty-state p { font-family: var(--serif); font-style: italic; font-size: 14px; }
+
+  /* ===== FOOTER / TOAST ===== */
+  .footer-note {
+    max-width: 640px;
+    margin: 30px auto 0;
+    padding: 0 14px;
+    color: var(--muted2);
+    font-size: 11.5px;
+    text-align: center;
+    line-height: 1.6;
+  }
+  .footer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .reset-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 9px 14px;
+    min-height: 44px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: all 0.15s ease;
+    flex: 1 1 140px;
+  }
+  .reset-btn:active { transform: scale(0.97); }
+  .reset-btn:hover { color: var(--crimson-bright); border-color: var(--crimson); }
+  #resetBtn:hover, #resetBtn:active { color: var(--crimson-bright); border-color: var(--crimson); }
+  #exportBtn:hover, #importBtn:hover { color: var(--gold); border-color: var(--gold-dim); }
+
+  .toast {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--bg-raised-2);
+    border: 1px solid var(--gold-dim);
+    color: var(--gold);
+    padding: 8px 8px 8px 14px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: var(--sans);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 50;
+    max-width: calc(100vw - 32px);
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events: auto;
+  }
+  #toastText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+    max-width: 52vw;
+  }
+  .toast-action {
+    display: none;
+    background: var(--gold);
+    color: #100d0b;
+    border: none;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    white-space: nowrap;
+    min-height: 32px;
+    flex-shrink: 0;
+  }
+  .toast-action.visible { display: inline-block; }
+  .toast .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .skeleton-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .skeleton-row {
+    height: 58px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--bg-raised) 0%, var(--bg-raised-2) 50%, var(--bg-raised) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.3s ease-in-out infinite;
+    border: 1px solid var(--border);
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ===== SEARCH CLEAR ===== */
+  .search-clear {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%) scale(0.7);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-raised-2);
+    color: var(--muted2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease, color 0.15s ease;
+  }
+  .search-clear.visible {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%) scale(1);
+  }
+  .search-clear:active { color: var(--crimson-bright); }
+
+  /* ===== CONFIRM MODAL ===== */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(8,6,5,0.6);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+    z-index: 100;
+  }
+  .modal-backdrop.show { opacity: 1; pointer-events: auto; }
+  .modal-card {
+    background: var(--bg-raised-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 20px;
+    max-width: 320px;
+    width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    transform: scale(0.92) translateY(8px);
+    transition: transform 0.22s cubic-bezier(.22,1,.36,1);
+  }
+  .modal-backdrop.show .modal-card { transform: scale(1) translateY(0); }
+  .modal-msg {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--cream);
+    line-height: 1.5;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .modal-actions {
+    display: flex;
+    gap: 8px;
+  }
+  .modal-btn {
+    flex: 1;
+    padding: 11px 10px;
+    border-radius: 9px;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    min-height: 44px;
+  }
+  .modal-btn.cancel { background: transparent; color: var(--muted); }
+  .modal-btn.cancel:active { background: var(--bg-raised); }
+  .modal-btn.confirm { background: var(--crimson); color: #fff; border-color: var(--crimson-bright); }
+  .modal-btn.confirm:active { background: var(--crimson-bright); }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  @media (max-width: 359px) {
+    h1 { font-size: 32px; }
+    .eyebrow { font-size: 9.5px; letter-spacing: 0.2em; }
+    .stat-row { gap: 14px; }
+    .stat-num { font-size: 19px; }
+    .title { font-size: 14px; }
+    select { font-size: 14px; }
+  }
+
+  @media (min-width: 520px) {
+    h1 { font-size: 54px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="marquee">
+  <div class="eyebrow">Now Screening · Personal Ledger</div>
+  <h1>THE BIG SCREEN</h1>
+  <div class="subtitle">Your passage through the IMDb Top 250</div>
+</div>
+
+<div class="strip-wrap">
+  <div class="strip">
+    <div class="strip-fill" id="stripFill"></div>
+    <div class="strip-holes" id="stripHoles"></div>
+    <div class="strip-label" id="stripLabel">0 / 250</div>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-num" id="statWatched">0</div><div class="stat-lbl">Watched</div></div>
+    <div class="stat"><div class="stat-num" id="statPct">0%</div><div class="stat-lbl">Complete</div></div>
+    <div class="stat"><div class="stat-num" id="statYear">0</div><div class="stat-lbl">This year</div></div>
+    <div class="stat"><div class="stat-num" id="statLeft">250</div><div class="stat-lbl">Remaining</div></div>
+  </div>
+</div>
+
+<div class="sticky-bar">
+  <div class="controls">
+    <div class="search-box">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#beb2a0" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input type="search" id="searchBox" placeholder="Search the marquee…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+      <button class="search-clear" id="searchClear" aria-label="Clear search">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <select id="sortSelect">
+      <option value="rank">Sort: Rank</option>
+      <option value="title">Sort: Title A–Z</option>
+      <option value="year">Sort: Year, newest</option>
+      <option value="yearOld">Sort: Year, oldest</option>
+      <option value="dateWatched">Sort: Recently watched</option>
+    </select>
+  </div>
+  <div class="chip-row">
+    <button class="chip active" data-filter="all">All 250</button>
+    <button class="chip" data-filter="watched">Watched</button>
+    <button class="chip" data-filter="unwatched">To watch</button>
+    <button class="chip chip-add" id="toggleAddForm">+ Add movie</button>
+  </div>
+  <div class="add-form" id="addForm">
+    <div class="add-form-inner">
+      <input type="text" id="addTitle" placeholder="Movie title" autocomplete="off" autocorrect="off" spellcheck="false" />
+      <input type="text" inputmode="numeric" id="addYear" placeholder="Year" maxlength="4" />
+      <button id="addBtn">Add</button>
+    </div>
+  </div>
+</div>
+
+<div class="list" id="list">
+  <div class="skeleton-list" id="skeletonList"></div>
+</div>
+<div class="footer-note">
+  Every checkmark, date, note, rating, and any movie you add or remove is stored privately to your account and matched by title, so the ledger survives future updates to the ranking.
+  <br><br>
+  <div class="footer-actions">
+    <button class="reset-btn" id="exportBtn">Export backup</button>
+    <button class="reset-btn" id="importBtn">Import backup</button>
+    <button class="reset-btn" id="resetBtn">Clear the whole ledger</button>
+  </div>
+  <input type="file" id="importFile" accept="application/json" style="display:none" />
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastText">Saved</span><button class="toast-action" id="toastAction"></button></div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-card" role="alertdialog" aria-modal="true">
+    <div class="modal-msg" id="modalMsg">Are you sure?</div>
+    <div class="modal-actions">
+      <button class="modal-btn cancel" id="modalCancel">Cancel</button>
+      <button class="modal-btn confirm" id="modalConfirm">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const movies = [
+["The Shawshank Redemption","1994"],
+["The Godfather","1972"],
+["The Dark Knight","2008"],
+["The Godfather Part II","1974"],
+["12 Angry Men","1957"],
+["The Lord of the Rings: The Return of the King","2003"],
+["Schindler's List","1993"],
+["Pulp Fiction","1994"],
+["The Lord of the Rings: The Fellowship of the Ring","2001"],
+["The Good, the Bad and the Ugly","1966"],
+["Forrest Gump","1994"],
+["The Lord of the Rings: The Two Towers","2002"],
+["Fight Club","1999"],
+["Inception","2010"],
+["Star Wars: Episode V - The Empire Strikes Back","1980"],
+["The Matrix","1999"],
+["Goodfellas","1990"],
+["One Flew Over the Cuckoo's Nest","1975"],
+["Seven Samurai","1954"],
+["Se7en","1995"],
+["It's a Wonderful Life","1946"],
+["City of God","2002"],
+["Saving Private Ryan","1998"],
+["Life Is Beautiful","1997"],
+["Interstellar","2014"],
+["The Green Mile","1999"],
+["Star Wars","1977"],
+["Terminator 2: Judgment Day","1991"],
+["Back to the Future","1985"],
+["Spirited Away","2001"],
+["The Silence of the Lambs","1991"],
+["Psycho","1960"],
+["Léon: The Professional","1994"],
+["Parasite","2019"],
+["The Departed","2006"],
+["The Prestige","2006"],
+["American History X","1998"],
+["Whiplash","2014"],
+["Harakiri","1962"],
+["Sunset Blvd.","1950"],
+["Casablanca","1942"],
+["Grave of the Fireflies","1988"],
+["Modern Times","1936"],
+["The Intouchables","2011"],
+["Rear Window","1954"],
+["Alien","1979"],
+["Cinema Paradiso","1990"],
+["City Lights","1931"],
+["Apocalypse Now","1979"],
+["Memento","2001"],
+["Django Unchained","2012"],
+["Raiders of the Lost Ark","1981"],
+["WALL·E","2008"],
+["The Lion King","1994"],
+["Joker","2019"],
+["Oldboy","2003"],
+["The Great Dictator","1940"],
+["Paths of Glory","1957"],
+["Coco","2017"],
+["Your Name.","2016"],
+["The Dark Knight Rises","2012"],
+["Aliens","1986"],
+["The Lives of Others","2006"],
+["Toy Story","1995"],
+["Star Wars: Episode VI - Return of the Jedi","1983"],
+["Witness for the Prosecution","1957"],
+["Braveheart","1995"],
+["Amadeus","1984"],
+["Toy Story 3","2010"],
+["12th Fail","2023"],
+["Once Upon a Time in America","1984"],
+["Reservoir Dogs","1992"],
+["Inglourious Basterds","2009"],
+["Good Will Hunting","1997"],
+["Snatch","2000"],
+["3 Idiots","2009"],
+["Rashômon","1950"],
+["Vertigo","1958"],
+["M","1931"],
+["North by Northwest","1959"],
+["Citizen Kane","1941"],
+["Full Metal Jacket","1987"],
+["Yojimbo","1961"],
+["Scarface","1983"],
+["Singin' in the Rain","1952"],
+["All About Eve","1950"],
+["Judgment at Nuremberg","1961"],
+["Come and See","1985"],
+["Dangal","2016"],
+["2001: A Space Odyssey","1968"],
+["Spider-Man: Across the Spider-Verse","2023"],
+["Bicycle Thieves","1948"],
+["Ikiru","1952"],
+["Taare Zameen Par","2007"],
+["Double Indemnity","1944"],
+["The Sting","1973"],
+["A Clockwork Orange","1971"],
+["The Kid","1921"],
+["Metropolis","1927"],
+["Sherlock Jr.","1924"],
+["Andrei Rublev","1966"],
+["Downfall","2004"],
+["Unforgiven","1992"],
+["Monty Python and the Holy Grail","1975"],
+["Batman Begins","2005"],
+["The Battle of Algiers","1966"],
+["To Kill a Mockingbird","1962"],
+["Ran","1985"],
+["Requiem for a Dream","2000"],
+["Some Like It Hot","1959"],
+["Die Hard","1988"],
+["The Apartment","1960"],
+["Persona","1966"],
+["My Neighbor Totoro","1988"],
+["Star Wars: Episode III - Revenge of the Sith","2005"],
+["The Wages of Fear","1953"],
+["Klaus","2019"],
+["Trainspotting","1996"],
+["Gladiator","2000"],
+["Jaws","1975"],
+["The Sixth Sense","1999"],
+["Green Book","2018"],
+["No Country for Old Men","2007"],
+["Ratatouille","2007"],
+["The Great Escape","1963"],
+["The Elephant Man","1980"],
+["There Will Be Blood","2007"],
+["High and Low","1963"],
+["Princess Mononoke","1997"],
+["Wild Strawberries","1957"],
+["Lawrence of Arabia","1962"],
+["Rocky","1976"],
+["Pather Panchali","1955"],
+["The Wizard of Oz","1939"],
+["Hotel Rwanda","2004"],
+["Mad Max: Fury Road","2015"],
+["The Bridge on the River Kwai","1957"],
+["Chinatown","1974"],
+["On the Waterfront","1954"],
+["Dial M for Murder","1954"],
+["The Treasure of the Sierra Madre","1948"],
+["A Separation","2011"],
+["The Deer Hunter","1978"],
+["Room","2015"],
+["Prisoners","2013"],
+["Rush","2013"],
+["The Big Lebowski","1998"],
+["Barry Lyndon","1975"],
+["Life of Brian","1979"],
+["Warrior","2011"],
+["Anatomy of a Fall","2023"],
+["Memories of Murder","2003"],
+["Pan's Labyrinth","2006"],
+["The Third Man","1949"],
+["The Truman Show","1998"],
+["Blade Runner","1982"],
+["Nausicaä of the Valley of the Wind","1984"],
+["Up","2009"],
+["Kill Bill: Vol. 1","2003"],
+["Sunrise: A Song of Two Humans","1927"],
+["In the Mood for Love","2000"],
+["Project Hail Mary","2026"],
+["The Wolf of Wall Street","2013"],
+["Rebecca","1940"],
+["Network","1976"],
+["Jai Bhim","2021"],
+["Platoon","1986"],
+["Ford v Ferrari","2019"],
+["The Grand Budapest Hotel","2014"],
+["Umberto D.","1952"],
+["Groundhog Day","1993"],
+["Incendies","2010"],
+["Amélie","2001"],
+["It Happened One Night","1934"],
+["Stand by Me","1986"],
+["Diabolique","1955"],
+["Tokyo Story","1953"],
+["La Haine","1995"],
+["L.A. Confidential","1997"],
+["The Help","2011"],
+["The Terminator","1984"],
+["Wild Tales","2014"],
+["Rang De Basanti","2006"],
+["Gone with the Wind","1939"],
+["Logan","2017"],
+["Hamlet","1964"],
+["Barfi!","2012"],
+["Drishyam","2013"],
+["The Shining","1980"],
+["Roman Holiday","1953"],
+["The Best Years of Our Lives","1946"],
+["The Handmaiden","2016"],
+["Gone Girl","2014"],
+["Cinema Paradiso (Nuovo)","1988"],
+["The Man Who Shot Liberty Valance","1962"],
+["Anand","1971"],
+["Spider-Man: Into the Spider-Verse","2018"],
+["Fanny and Alexander","1982"],
+["Persepolis","2007"],
+["Django","1966"],
+["Big Fish","2003"],
+["La Strada","1954"],
+["Mr. Smith Goes to Washington","1939"],
+["Slumdog Millionaire","2008"],
+["Shutter Island","2010"],
+["Millennium Actress","2001"],
+["The Passion of Joan of Arc","1928"],
+["Aladdin","1992"],
+["Ip Man","2008"],
+["A Beautiful Mind","2001"],
+["Sonatine","1993"],
+["Beauty and the Beast","1946"],
+["Children of Heaven","1997"],
+["The Passion of Joan of Arc (Dreyer)","1928"],
+["Toy Story 4","2019"],
+["Manchester by the Sea","2016"],
+["Portrait of a Lady on Fire","2019"],
+["Andhadhun","2018"],
+["Once Upon a Time in the West","1968"],
+["Fargo","1996"],
+["Dersu Uzala","1975"],
+["Pirates of the Caribbean: The Curse of the Black Pearl","2003"],
+["Contempt","1963"],
+["Millennium Mambo","2001"],
+["The Battle of Algiers (Algeri)","1966"],
+["Perfect Blue","1997"],
+["Jurassic Park","1993"],
+["Munna Bhai M.B.B.S.","2003"],
+["Nayakan","1987"],
+["Aparajito","1956"],
+["Amores Perros","2000"],
+["Uri: The Surgical Strike","2019"],
+["Gone Baby Gone","2007"],
+["Monsters, Inc.","2001"],
+["Fanaa","2006"],
+["Black Book","2006"],
+["Big Hero 6","2014"],
+["Vikram Vedha","2017"],
+["Aguirre, the Wrath of God","1972"],
+["Autumn Sonata","1978"],
+["Life of Pi","2012"],
+["Har Har Mahadev","2022"],
+["Queen","2013"],
+["Local Hero","1983"],
+["Cool Hand Luke","1967"],
+["Gangs of Wasseypur","2012"],
+["The General","1926"],
+["1917","2019"],
+["Harry Potter and the Deathly Hallows: Part 2","2011"],
+["Top Gun: Maverick","2022"]
+];
+
+const list = document.getElementById('list');
+const stripFill = document.getElementById('stripFill');
+const stripLabel = document.getElementById('stripLabel');
+const stripHoles = document.getElementById('stripHoles');
+const statWatched = document.getElementById('statWatched');
+const statPct = document.getElementById('statPct');
+const statYear = document.getElementById('statYear');
+const statLeft = document.getElementById('statLeft');
+const searchBox = document.getElementById('searchBox');
+const sortSelect = document.getElementById('sortSelect');
+const chips = document.querySelectorAll('.chip[data-filter]');
+const resetBtn = document.getElementById('resetBtn');
+const toast = document.getElementById('toast');
+const toastText = document.getElementById('toastText');
+const toggleAddForm = document.getElementById('toggleAddForm');
+const addForm = document.getElementById('addForm');
+const addTitle = document.getElementById('addTitle');
+const addYear = document.getElementById('addYear');
+const addBtn = document.getElementById('addBtn');
+const exportBtn = document.getElementById('exportBtn');
+const importBtn = document.getElementById('importBtn');
+const importFile = document.getElementById('importFile');
+const searchClear = document.getElementById('searchClear');
+const skeletonList = document.getElementById('skeletonList');
+const modalBackdrop = document.getElementById('modalBackdrop');
+const modalMsg = document.getElementById('modalMsg');
+const modalConfirm = document.getElementById('modalConfirm');
+const modalCancel = document.getElementById('modalCancel');
+
+let customMovies = []; // [[title, year], ...] user-added
+let removedKeys = new Set(); // titleKeys hidden from the list (base or custom)
+const CUSTOM_KEY = 'imdb-top-250-custom';
+const REMOVED_KEY = 'imdb-top-250-removed';
+
+let state = {};
+let currentFilter = 'all';
+let searchDebounce = null;
+let firstRenderDone = false;
+let expandedKey = null; // titleKey of the item whose rating/notes panel is open
+let pendingRemoval = null; // { key, title, custom, timer } awaiting commit, undoable
+const STORAGE_KEY = 'imdb-top-250-progress';
+
+function titleKey(title, year) { return (title + '|' + year).toLowerCase(); }
+function todayStr() { return new Date().toISOString().slice(0,10); }
+function decadeOf(year) {
+  const y = parseInt(year, 10);
+  if (isNaN(y)) return 'No year';
+  return Math.floor(y/10)*10 + 's';
+}
+function buzz(ms) {
+  try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
+}
+
+// build sprocket holes
+for (let i = 0; i < 28; i++) {
+  const s = document.createElement('span');
+  stripHoles.appendChild(s);
+}
+// build skeleton placeholder rows shown until saved data loads
+for (let i = 0; i < 8; i++) {
+  const s = document.createElement('div');
+  s.className = 'skeleton-row';
+  s.style.animationDelay = (i * 0.06) + 's';
+  skeletonList.appendChild(s);
+}
+
+const toastAction = document.getElementById('toastAction');
+let toastTimeout;
+function showToast(msg, opts) {
+  opts = opts || {};
+  toastText.textContent = msg;
+  toast.classList.add('show');
+  if (opts.actionLabel && opts.onAction) {
+    toastAction.textContent = opts.actionLabel;
+    toastAction.classList.add('visible');
+    toastAction.onclick = () => {
+      opts.onAction();
+      toast.classList.remove('show');
+      clearTimeout(toastTimeout);
+    };
+  } else {
+    toastAction.classList.remove('visible');
+    toastAction.onclick = null;
+  }
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toast.classList.remove('show');
+    if (opts.onExpire) opts.onExpire();
+  }, opts.duration || 1400);
+}
+
+// promise-based confirm modal (replaces jarring native confirm())
+let modalResolver = null;
+function showConfirm(message, confirmLabel) {
+  modalMsg.textContent = message;
+  modalConfirm.textContent = confirmLabel || 'Confirm';
+  modalBackdrop.classList.add('show');
+  return new Promise(resolve => { modalResolver = resolve; });
+}
+function closeModal(result) {
+  modalBackdrop.classList.remove('show');
+  if (modalResolver) { modalResolver(result); modalResolver = null; }
+}
+modalConfirm.addEventListener('click', () => closeModal(true));
+modalCancel.addEventListener('click', () => closeModal(false));
+modalBackdrop.addEventListener('click', e => { if (e.target === modalBackdrop) closeModal(false); });
+
+// smoothly animate a stat number's displayed digits when it changes
+function setStatNumber(el, value, suffix) {
+  suffix = suffix || '';
+  const prev = parseInt(el.dataset.val || '0', 10);
+  const next = value;
+  el.dataset.val = next;
+  if (prev === next) { el.textContent = next + suffix; return; }
+  const start = performance.now();
+  const duration = 320;
+  function step(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    const current = Math.round(prev + (next - prev) * eased);
+    el.textContent = current + suffix;
+    if (t < 1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+let saveTimer = null;
+function saveState() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try {
+      const result = await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+      showToast(result ? 'Saved' : 'Save failed — check connection');
+    } catch (e) {
+      showToast('Save failed — check connection');
+    }
+  }, 220);
+}
+
+async function loadState() {
+  try {
+    const result = await window.storage.get(STORAGE_KEY, false);
+    if (result && result.value) state = JSON.parse(result.value);
+  } catch (e) {
+    try {
+      const legacy = await window.storage.get('imdb-top-250-progress-byrank', false);
+      if (legacy && legacy.value) {
+        const legacyState = JSON.parse(legacy.value);
+        const keys = Object.keys(legacyState);
+        if (keys.length && keys.every(k => /^\d+$/.test(k))) {
+          keys.forEach(rank => {
+            const idx = parseInt(rank, 10) - 1;
+            if (movies[idx]) state[titleKey(movies[idx][0], movies[idx][1])] = legacyState[rank];
+          });
+          await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+        }
+      }
+    } catch (e2) { state = {}; }
+  }
+  try {
+    const c = await window.storage.get(CUSTOM_KEY, false);
+    if (c && c.value) customMovies = JSON.parse(c.value);
+  } catch (e) { customMovies = []; }
+  try {
+    const r = await window.storage.get(REMOVED_KEY, false);
+    if (r && r.value) removedKeys = new Set(JSON.parse(r.value));
+  } catch (e) { removedKeys = new Set(); }
+  render();
+}
+
+async function saveCustomMovies() {
+  try { await window.storage.set(CUSTOM_KEY, JSON.stringify(customMovies), false); } catch (e) {}
+}
+async function saveRemovedKeys() {
+  try { await window.storage.set(REMOVED_KEY, JSON.stringify([...removedKeys]), false); } catch (e) {}
+}
+
+function getAllMovies() {
+  const base = movies.map((m, idx) => ({ title: m[0], year: m[1], rank: idx + 1, custom: false }));
+  const added = customMovies.map(m => ({ title: m[0], year: m[1], rank: null, custom: true }));
+  return base.concat(added).filter(m => {
+    const k = titleKey(m.title, m.year);
+    if (removedKeys.has(k)) return false;
+    if (pendingRemoval && pendingRemoval.key === k) return false;
+    return true;
+  });
+}
+
+function updateStats() {
+  const all = getAllMovies();
+  const total = all.length;
+  const entries = all
+    .map(m => state[titleKey(m.title, m.year)])
+    .filter(v => v && v.watched);
+  const watched = entries.length;
+  const pct = total ? Math.round((watched/total)*100) : 0;
+  const thisYear = entries.filter(v => v.date && v.date.slice(0,4) === new Date().getFullYear().toString()).length;
+
+  stripFill.style.width = pct + '%';
+  stripLabel.textContent = `${watched} / ${total}`;
+  setStatNumber(statWatched, watched);
+  setStatNumber(statPct, pct, '%');
+  setStatNumber(statYear, thisYear);
+  setStatNumber(statLeft, total - watched);
+
+  const allChip = document.querySelector('.chip[data-filter="all"]');
+  if (allChip) allChip.textContent = `All ${total}`;
+}
+
+function getSortedMovies() {
+  const withIdx = getAllMovies();
+  const sortMode = sortSelect.value;
+  if (sortMode === 'title') {
+    withIdx.sort((a,b) => a.title.localeCompare(b.title));
+  } else if (sortMode === 'year') {
+    withIdx.sort((a,b) => parseInt(b.year) - parseInt(a.year));
+  } else if (sortMode === 'yearOld') {
+    withIdx.sort((a,b) => parseInt(a.year) - parseInt(b.year));
+  } else if (sortMode === 'dateWatched') {
+    withIdx.sort((a,b) => {
+      const ea = state[titleKey(a.title,a.year)], eb = state[titleKey(b.title,b.year)];
+      const da = (ea && ea.watched && ea.date) ? ea.date : '';
+      const db = (eb && eb.watched && eb.date) ? eb.date : '';
+      if (!da && !db) return (a.rank||9999) - (b.rank||9999);
+      if (!da) return 1;
+      if (!db) return -1;
+      return db.localeCompare(da);
+    });
+  } else {
+    // default rank order: numbered ranks first, then custom additions at the end
+    withIdx.sort((a,b) => (a.rank||9999) - (b.rank||9999));
+  }
+  return withIdx;
+}
+
+// Removal isn't committed immediately — gives the person a few seconds to undo.
+function scheduleRemoval(key, title, custom) {
+  if (pendingRemoval) commitRemoval(pendingRemoval); // only one pending at a time
+  const timer = setTimeout(() => commitRemoval(pending), 5000);
+  const pending = { key, title, custom, timer };
+  pendingRemoval = pending;
+  showToast(`Removed "${title}"`, {
+    actionLabel: 'Undo',
+    duration: 5000,
+    onAction: () => {
+      clearTimeout(pending.timer);
+      if (pendingRemoval === pending) pendingRemoval = null;
+      showToast('Restored');
+      render();
+    },
+    onExpire: () => {
+      if (pendingRemoval === pending) commitRemoval(pending);
+    }
+  });
+}
+function commitRemoval(pending) {
+  if (!pending) return;
+  clearTimeout(pending.timer);
+  if (pending.custom) {
+    customMovies = customMovies.filter(m => titleKey(m[0], m[1]) !== pending.key);
+    saveCustomMovies();
+  } else {
+    removedKeys.add(pending.key);
+    saveRemovedKeys();
+  }
+  delete state[pending.key];
+  saveState();
+  if (pendingRemoval === pending) pendingRemoval = null;
+  render();
+}
+
+function buildDetailPanel(key, entry) {
+  const panel = document.createElement('div');
+  panel.className = 'detail-panel';
+
+  const starLabel = document.createElement('span');
+  starLabel.className = 'detail-label';
+  starLabel.textContent = 'Your rating';
+  const stars = document.createElement('div');
+  stars.className = 'stars';
+  for (let i = 1; i <= 5; i++) {
+    const starBtn = document.createElement('button');
+    starBtn.className = 'star-btn' + (entry.rating >= i ? ' filled' : '');
+    starBtn.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M12 17.3l-5.4 3 1-6-4.4-4.3 6-.9L12 3l2.8 5.6 6 .9-4.4 4.3 1 6z"/></svg>';
+    starBtn.setAttribute('aria-label', i + ' star' + (i > 1 ? 's' : ''));
+    starBtn.addEventListener('click', () => {
+      if (!state[key]) state[key] = { watched: false, date: '' };
+      state[key].rating = (state[key].rating === i) ? 0 : i; // tap same star again to clear
+      buzz(8);
+      saveState();
+      render();
+    });
+    stars.appendChild(starBtn);
+  }
+
+  const noteLabel = document.createElement('span');
+  noteLabel.className = 'detail-label';
+  noteLabel.textContent = 'Notes';
+  const noteBox = document.createElement('textarea');
+  noteBox.className = 'note-textarea';
+  noteBox.placeholder = 'Thoughts, quotes, who you watched it with…';
+  noteBox.value = entry.note || '';
+  let noteSaveTimer = null;
+  noteBox.addEventListener('input', () => {
+    clearTimeout(noteSaveTimer);
+    noteSaveTimer = setTimeout(() => {
+      if (!state[key]) state[key] = { watched: false, date: '' };
+      state[key].note = noteBox.value;
+      saveState();
+    }, 400);
+  });
+
+  panel.appendChild(starLabel);
+  panel.appendChild(stars);
+  panel.appendChild(noteLabel);
+  panel.appendChild(noteBox);
+  return panel;
+}
+
+function render() {
+  const query = searchBox.value.trim().toLowerCase();
+  const sortMode = sortSelect.value;
+  const items = getSortedMovies();
+  list.innerHTML = '';
+  let shown = 0;
+  let lastDecade = null;
+
+  items.forEach(({title, year, rank, custom}, i) => {
+    const key = titleKey(title, year);
+    const entry = state[key] || { watched: false, date: '' };
+
+    if (query && !title.toLowerCase().includes(query)) return;
+    if (currentFilter === 'watched' && !entry.watched) return;
+    if (currentFilter === 'unwatched' && entry.watched) return;
+
+    if (sortMode === 'year' || sortMode === 'yearOld') {
+      const d = decadeOf(year);
+      if (d !== lastDecade) {
+        const dh = document.createElement('div');
+        dh.className = 'decade-header';
+        dh.textContent = d;
+        list.appendChild(dh);
+        lastDecade = d;
+      }
+    }
+
+    const item = document.createElement('div');
+    item.className = 'item' + (entry.watched ? ' done' : '');
+    item.style.animationDelay = Math.min(shown * 10, 180) + 'ms';
+    shown++;
+
+    const checkZone = document.createElement('div');
+    checkZone.className = 'check-zone';
+    const checkBtn = document.createElement('button');
+    checkBtn.className = 'check-btn' + (entry.watched ? ' checked' : '');
+    checkBtn.setAttribute('aria-label', entry.watched ? 'Mark as unwatched' : 'Mark as watched');
+    checkBtn.innerHTML = '<span class="ring"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ece3d2" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>';
+    checkBtn.addEventListener('click', () => {
+      if (!state[key]) state[key] = { watched: false, date: '' };
+      state[key].watched = !state[key].watched;
+      if (state[key].watched && !state[key].date) state[key].date = todayStr();
+      buzz(state[key].watched ? 10 : 6);
+      checkBtn.classList.toggle('checked', state[key].watched);
+      checkBtn.classList.remove('pulse');
+      void checkBtn.offsetWidth;
+      checkBtn.classList.add('pulse');
+      item.classList.toggle('done', state[key].watched);
+      dateInput.disabled = !state[key].watched;
+      dateInput.value = state[key].date || '';
+      saveState();
+      updateStats();
+      if (currentFilter !== 'all') {
+        item.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(-8px)';
+        setTimeout(render, 220);
+      }
+    });
+    checkZone.appendChild(checkBtn);
+
+    const rankBadge = document.createElement('div');
+    rankBadge.className = 'rank-badge' + (custom ? ' custom' : '');
+    rankBadge.textContent = custom ? 'NEW' : '#' + rank;
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    const titleEl = document.createElement('div');
+    titleEl.className = 'title';
+    titleEl.textContent = title;
+    const yearEl = document.createElement('div');
+    yearEl.className = 'year';
+    yearEl.textContent = year;
+    info.appendChild(titleEl);
+    info.appendChild(yearEl);
+
+    if (entry.rating || entry.note) {
+      const mini = document.createElement('div');
+      mini.className = 'mini-preview';
+      if (entry.rating) {
+        const s = document.createElement('span');
+        s.className = 'mini-stars';
+        s.textContent = '★'.repeat(entry.rating) + '☆'.repeat(5 - entry.rating);
+        mini.appendChild(s);
+      }
+      if (entry.note) {
+        const n = document.createElement('span');
+        n.className = 'mini-note';
+        n.textContent = entry.note;
+        mini.appendChild(n);
+      }
+      info.appendChild(mini);
+    }
+
+    const stub = document.createElement('div');
+    stub.className = 'stub';
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.className = 'date-input';
+    dateInput.value = entry.date || '';
+    dateInput.disabled = !entry.watched;
+    dateInput.addEventListener('change', () => {
+      if (!state[key]) state[key] = { watched: true, date: '' };
+      state[key].date = dateInput.value;
+      saveState();
+      updateStats();
+      if (sortSelect.value === 'dateWatched') render();
+    });
+    stub.appendChild(dateInput);
+
+    const detailToggle = document.createElement('button');
+    detailToggle.className = 'detail-toggle' + (expandedKey === key ? ' active' : '');
+    detailToggle.setAttribute('aria-label', 'Rate or add a note for ' + title);
+    detailToggle.innerHTML = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.3l-5.4 3 1-6-4.4-4.3 6-.9L12 3l2.8 5.6 6 .9-4.4 4.3 1 6z"/></svg>';
+    detailToggle.addEventListener('click', () => {
+      expandedKey = (expandedKey === key) ? null : key;
+      render();
+      if (expandedKey === key) {
+        setTimeout(() => {
+          const panel = document.querySelector('.detail-panel');
+          if (panel) panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }, 60);
+      }
+    });
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-btn';
+    removeBtn.setAttribute('aria-label', 'Remove ' + title + ' from the list');
+    removeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>';
+    removeBtn.addEventListener('click', async () => {
+      const ok = await showConfirm(`Remove "${title}" from your list?`, 'Remove');
+      if (!ok) return;
+      buzz(12);
+      item.style.transition = 'opacity 0.22s ease, transform 0.22s ease, max-height 0.22s ease, margin 0.22s ease, padding 0.22s ease';
+      item.style.maxHeight = item.offsetHeight + 'px';
+      requestAnimationFrame(() => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateX(16px) scale(0.97)';
+        item.style.maxHeight = '0px';
+        item.style.marginBottom = '0px';
+      });
+      setTimeout(() => scheduleRemoval(key, title, custom), 230);
+    });
+
+    item.appendChild(checkZone);
+    item.appendChild(rankBadge);
+    item.appendChild(info);
+    item.appendChild(stub);
+    item.appendChild(detailToggle);
+    item.appendChild(removeBtn);
+    list.appendChild(item);
+
+    if (expandedKey === key) {
+      list.appendChild(buildDetailPanel(key, entry));
+    }
+  });
+
+  if (shown === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    empty.innerHTML = '<div class="glyph">— · —</div><p>' +
+      (query ? 'No titles match that search.' : currentFilter === 'watched' ? 'The reel is empty. Nothing checked off yet.' : "Everything's been watched. Take a bow.") +
+      '</p>';
+    list.appendChild(empty);
+  }
+
+  updateStats();
+}
+
+searchBox.addEventListener('input', () => {
+  searchClear.classList.toggle('visible', searchBox.value.length > 0);
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(render, 120);
+});
+searchClear.addEventListener('click', () => {
+  searchBox.value = '';
+  searchClear.classList.remove('visible');
+  searchBox.focus();
+  render();
+});
+sortSelect.addEventListener('change', render);
+chips.forEach(chip => {
+  chip.addEventListener('click', () => {
+    if (chip.classList.contains('active')) return;
+    buzz(8);
+    chips.forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    currentFilter = chip.dataset.filter;
+    render();
+  });
+});
+resetBtn.addEventListener('click', async () => {
+  const ok = await showConfirm('Clear every checkmark and date? This cannot be undone.', 'Clear it');
+  if (!ok) return;
+  buzz(12);
+  state = {};
+  try { await window.storage.set(STORAGE_KEY, JSON.stringify(state), false); } catch (e) {}
+  showToast('Ledger cleared');
+  render();
+});
+
+toggleAddForm.addEventListener('click', () => {
+  const open = addForm.classList.toggle('open');
+  toggleAddForm.classList.toggle('active', open);
+  if (open) setTimeout(() => addTitle.focus(), 220);
+});
+
+// subtle shadow under the sticky bar once the page has scrolled
+const stickyBarEl = document.querySelector('.sticky-bar');
+window.addEventListener('scroll', () => {
+  stickyBarEl.classList.toggle('scrolled', window.scrollY > 4);
+}, { passive: true });
+
+function handleAddMovie() {
+  const title = addTitle.value.trim();
+  const year = addYear.value.trim();
+  if (!title) { addTitle.focus(); return; }
+  if (year && !/^\d{4}$/.test(year)) { showToast('Enter a 4-digit year, or leave it blank'); addYear.focus(); return; }
+  const key = titleKey(title, year || '—');
+  const exists = getAllMovies().some(m => titleKey(m.title, m.year) === key);
+  if (exists) { showToast('Already on your list'); return; }
+  customMovies.push([title, year || '—']);
+  saveCustomMovies();
+  addTitle.value = '';
+  addYear.value = '';
+  buzz(10);
+  showToast('Added "' + title + '"');
+  render();
+}
+addBtn.addEventListener('click', handleAddMovie);
+addTitle.addEventListener('keydown', e => { if (e.key === 'Enter') handleAddMovie(); });
+addYear.addEventListener('keydown', e => { if (e.key === 'Enter') handleAddMovie(); });
+
+exportBtn.addEventListener('click', () => {
+  const payload = {
+    app: 'the-big-screen-top-250',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    state,
+    customMovies,
+    removedKeys: [...removedKeys]
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = todayStr();
+  a.href = url;
+  a.download = `big-screen-backup-${stamp}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  showToast('Backup downloaded');
+});
+
+importBtn.addEventListener('click', () => importFile.click());
+
+importFile.addEventListener('change', () => {
+  const file = importFile.files && importFile.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async () => {
+    let parsed;
+    try {
+      parsed = JSON.parse(reader.result);
+    } catch (e) {
+      showToast('That file doesn\u2019t look like a valid backup');
+      importFile.value = '';
+      return;
+    }
+    if (typeof parsed !== 'object' || parsed === null || typeof parsed.state !== 'object') {
+      showToast('That file doesn\u2019t look like a valid backup');
+      importFile.value = '';
+      return;
+    }
+    const ok = await showConfirm('Import this backup? It will replace all your current checkmarks, dates, ratings, notes, and custom movies.', 'Import');
+    importFile.value = '';
+    if (!ok) return;
+    state = parsed.state || {};
+    customMovies = Array.isArray(parsed.customMovies) ? parsed.customMovies : [];
+    removedKeys = new Set(Array.isArray(parsed.removedKeys) ? parsed.removedKeys : []);
+    pendingRemoval = null;
+    expandedKey = null;
+    try {
+      await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+      await saveCustomMovies();
+      await saveRemovedKeys();
+    } catch (e) {}
+    showToast('Backup imported');
+    render();
+  };
+  reader.readAsText(file);
+});
+
+loadState();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
