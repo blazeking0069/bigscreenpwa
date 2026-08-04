@@ -1909,6 +1909,9 @@ document.addEventListener('keydown', (e) => {
     if (addForm.classList.contains('open')) {
       addForm.classList.remove('open');
       toggleAddForm.classList.remove('active');
+      if (document.activeElement === addTitle || document.activeElement === addYear) {
+        document.activeElement.blur();
+      }
       return;
     }
     if (expandedKey !== null) { expandedKey = null; render(); return; }
