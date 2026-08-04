@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#100d0b">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Big Screen">
 <meta name="description" content="Track your way through the IMDb Top 250 with ratings, notes, and watch dates.">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#100d0b">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Big Screen">
 <title>The Big Screen — Top 250 Ledger</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -961,6 +961,42 @@
 </div>
 
 <script>
+// window.storage is provided by Claude's own artifact preview. Outside that
+// environment (e.g. hosted on GitHub Pages), it doesn't exist — so we fall
+// back to the browser's real, built-in localStorage to make saving work.
+if (typeof window.storage === 'undefined') {
+  const LS_PREFIX = 'bigscreen:';
+  window.storage = {
+    async get(key) {
+      try {
+        const raw = localStorage.getItem(LS_PREFIX + key);
+        return raw === null ? null : { key, value: raw, shared: false };
+      } catch (e) { return null; }
+    },
+    async set(key, value) {
+      try {
+        localStorage.setItem(LS_PREFIX + key, value);
+        return { key, value, shared: false };
+      } catch (e) { return null; }
+    },
+    async delete(key) {
+      try {
+        localStorage.removeItem(LS_PREFIX + key);
+        return { key, deleted: true, shared: false };
+      } catch (e) { return null; }
+    },
+    async list(prefix) {
+      try {
+        const keys = Object.keys(localStorage)
+          .filter(k => k.startsWith(LS_PREFIX))
+          .map(k => k.slice(LS_PREFIX.length))
+          .filter(k => !prefix || k.startsWith(prefix));
+        return { keys, prefix, shared: false };
+      } catch (e) { return null; }
+    }
+  };
+}
+
 const movies = [
 ["The Shawshank Redemption","1994"],
 ["The Godfather","1972"],

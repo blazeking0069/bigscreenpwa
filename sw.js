@@ -1,6 +1,9 @@
 // Minimal service worker so this qualifies as an installable PWA.
-// Caches the app shell on first load so it still opens with no connection.
-const CACHE_NAME = 'big-screen-v1';
+// Network-first: always tries to fetch the latest version when online,
+// and only falls back to the cached copy if the network request fails
+// (i.e. actually offline). This avoids serving a stale cached page
+// after the site has been updated.
+const CACHE_NAME = 'big-screen-v2';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', (event) => {
@@ -22,17 +25,14 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const network = fetch(event.request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || network;
-    })
+    fetch(event.request)
+      .then((response) => {
+        if (response && response.status === 200) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
