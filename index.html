@@ -893,6 +893,177 @@
   .modal-btn.confirm { background: var(--crimson); color: #fff; border-color: var(--crimson-bright); }
   .modal-btn.confirm:active { background: var(--crimson-bright); }
 
+  /* ===== ICON BUTTON (surprise-me dice) ===== */
+  .icon-btn {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-raised);
+    font-size: 19px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .icon-btn:active { transform: scale(0.9) rotate(-8deg); }
+  .icon-btn:hover { border-color: var(--gold-dim); }
+
+  /* ===== SHEET MODAL (surprise / stats / settings) ===== */
+  .sheet-card {
+    max-width: 420px;
+    max-height: 82vh;
+    overflow-y: auto;
+    position: relative;
+    text-align: left;
+  }
+  .sheet-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-raised);
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .sheet-close:active { color: var(--crimson-bright); }
+  .sheet-title {
+    font-family: var(--display);
+    font-size: 22px;
+    letter-spacing: 0.03em;
+    color: var(--gold);
+    margin: 0 28px 14px 0;
+  }
+  .surprise-title {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 24px;
+    color: var(--cream);
+    text-align: center;
+    margin: 10px 0 4px;
+    line-height: 1.25;
+  }
+  .surprise-year {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .surprise-actions { display: flex; gap: 8px; }
+
+  .stat-block { margin-bottom: 18px; }
+  .stat-block-title {
+    font-size: 10.5px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 8px;
+  }
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 12.5px;
+  }
+  .bar-label { width: 54px; flex-shrink: 0; color: var(--muted); }
+  .bar-track {
+    flex: 1;
+    height: 10px;
+    background: var(--bg);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--crimson), var(--gold));
+    border-radius: 999px;
+    transition: width 0.5s cubic-bezier(.22,1,.36,1);
+  }
+  .bar-count { width: 34px; text-align: right; color: var(--muted2); flex-shrink: 0; }
+  .stat-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border-soft);
+    font-size: 13.5px;
+  }
+  .stat-summary-row span:first-child { color: var(--muted); }
+  .stat-summary-row span:last-child { color: var(--gold); font-weight: 600; }
+
+  .settings-field { margin-bottom: 14px; }
+  .settings-field label {
+    display: block;
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .settings-field input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--cream);
+    padding: 10px 11px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: var(--sans);
+  }
+  .settings-note {
+    font-size: 12px;
+    color: var(--muted2);
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .settings-note a { color: var(--gold-dim); }
+
+  /* ===== POSTER THUMBNAIL ===== */
+  .poster {
+    width: 34px;
+    height: 51px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    object-fit: cover;
+    background: var(--bg);
+    margin: auto 0 auto 4px;
+  }
+  .poster-placeholder {
+    width: 34px;
+    height: 51px;
+    flex-shrink: 0;
+    border-radius: 5px;
+    background: var(--bg);
+    margin: auto 0 auto 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--border);
+    font-size: 16px;
+  }
+
+  /* ===== CONFETTI ===== */
+  .confetti-piece {
+    position: fixed;
+    top: -20px;
+    width: 8px;
+    height: 14px;
+    z-index: 200;
+    pointer-events: none;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    to { transform: translateY(110vh) rotate(600deg); opacity: 0.4; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
   }
@@ -948,12 +1119,15 @@
       <option value="year">Sort: Year, newest</option>
       <option value="yearOld">Sort: Year, oldest</option>
       <option value="dateWatched">Sort: Recently watched</option>
+      <option value="rating">Sort: My rating</option>
     </select>
+    <button class="icon-btn" id="surpriseBtn" aria-label="Surprise me with something to watch" title="Surprise me">🎲</button>
   </div>
   <div class="chip-row">
     <button class="chip active" data-filter="all">All 250</button>
     <button class="chip" data-filter="watched">Watched</button>
     <button class="chip" data-filter="unwatched">To watch</button>
+    <button class="chip" data-filter="rated">★ Rated</button>
     <button class="chip chip-add" id="toggleAddForm">+ Add movie</button>
   </div>
   <div class="add-form" id="addForm">
@@ -972,6 +1146,9 @@
   Every checkmark, date, note, rating, and any movie you add or remove is stored privately to your account and matched by title, so the ledger survives future updates to the ranking.
   <br><br>
   <div class="footer-actions">
+    <button class="reset-btn" id="statsBtn">📊 Stats</button>
+    <button class="reset-btn" id="shareBtn">Share progress</button>
+    <button class="reset-btn" id="posterSettingsBtn">Poster settings</button>
     <button class="reset-btn" id="exportBtn">Export backup</button>
     <button class="reset-btn" id="importBtn">Import backup</button>
     <button class="reset-btn" id="resetBtn">Clear the whole ledger</button>
@@ -980,6 +1157,17 @@
 </div>
 
 <div class="toast" id="toast"><span class="dot"></span><span id="toastText">Saved</span><button class="toast-action" id="toastAction"></button></div>
+
+<canvas id="shareCanvas" width="1080" height="1080" style="display:none"></canvas>
+
+<div class="modal-backdrop" id="sheetBackdrop">
+  <div class="modal-card sheet-card">
+    <button class="sheet-close" id="sheetClose" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div id="sheetContent"></div>
+  </div>
+</div>
 
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal-card" role="alertdialog" aria-modal="true">
@@ -1309,6 +1497,15 @@ const modalBackdrop = document.getElementById('modalBackdrop');
 const modalMsg = document.getElementById('modalMsg');
 const modalConfirm = document.getElementById('modalConfirm');
 const modalCancel = document.getElementById('modalCancel');
+const surpriseBtn = document.getElementById('surpriseBtn');
+const sheetBackdrop = document.getElementById('sheetBackdrop');
+const sheetContent = document.getElementById('sheetContent');
+const sheetClose = document.getElementById('sheetClose');
+const shareBtn = document.getElementById('shareBtn');
+const shareCanvas = document.getElementById('shareCanvas');
+const statsBtn = document.getElementById('statsBtn');
+const posterSettingsBtn = document.getElementById('posterSettingsBtn');
+let currentSurprise = null; // the movie currently shown in the surprise sheet
 
 let customMovies = []; // [[title, year], ...] user-added
 let removedKeys = new Set(); // titleKeys hidden from the list (base or custom)
@@ -1322,6 +1519,20 @@ let firstRenderDone = false;
 let expandedKey = null; // titleKey of the item whose rating/notes panel is open
 let pendingRemoval = null; // { key, title, custom, timer } awaiting commit, undoable
 const STORAGE_KEY = 'imdb-top-250-progress';
+
+let hitMilestones = new Set(); // which % thresholds have already been celebrated
+const MILESTONES = [25, 50, 75, 100];
+const MILESTONES_KEY = 'imdb-top-250-milestones';
+let milestonesReady = false; // true once the initial baseline has been seeded (see loadState)
+
+let tmdbApiKey = ''; // person's own free TMDB API key, stored locally only
+const TMDB_KEY_STORAGE = 'imdb-top-250-tmdb-key';
+let posterCache = {}; // titleKey -> poster_path string, or null if TMDB has no poster for it
+const POSTER_CACHE_KEY = 'imdb-top-250-poster-cache';
+const posterQueue = []; // pending {key, title, year} fetch jobs
+const posterQueued = new Set(); // titleKeys already queued or in flight, to avoid duplicate fetches
+let posterInFlight = 0;
+const POSTER_CONCURRENCY = 4; // stay well under TMDB's rate limit
 
 function titleKey(title, year) { return (title + '|' + year).toLowerCase(); }
 function todayStr() { return new Date().toISOString().slice(0,10); }
@@ -1448,7 +1659,76 @@ async function loadState() {
     const r = await window.storage.get(REMOVED_KEY, false);
     if (r && r.value) removedKeys = new Set(JSON.parse(r.value));
   } catch (e) { removedKeys = new Set(); }
+  try {
+    const ms = await window.storage.get(MILESTONES_KEY, false);
+    if (ms && ms.value) hitMilestones = new Set(JSON.parse(ms.value));
+  } catch (e) { hitMilestones = new Set(); }
+
+  // Seed the baseline silently: don't fire a celebration for progress the
+  // person already made before this feature existed, only for future crossings.
+  const seedTotal = getAllMovies().length;
+  const seedWatched = Object.values(state).filter(v => v && v.watched).length;
+  const seedPct = seedTotal ? Math.round((seedWatched/seedTotal)*100) : 0;
+  let seeded = false;
+  MILESTONES.forEach(m => { if (seedPct >= m && !hitMilestones.has(m)) { hitMilestones.add(m); seeded = true; } });
+  if (seeded) saveMilestones();
+  milestonesReady = true;
+
+  try {
+    const k = await window.storage.get(TMDB_KEY_STORAGE, false);
+    if (k && k.value) tmdbApiKey = k.value;
+  } catch (e) { tmdbApiKey = ''; }
+  try {
+    const pc = await window.storage.get(POSTER_CACHE_KEY, false);
+    if (pc && pc.value) posterCache = JSON.parse(pc.value);
+  } catch (e) { posterCache = {}; }
+
   render();
+}
+
+async function saveMilestones() {
+  try { await window.storage.set(MILESTONES_KEY, JSON.stringify([...hitMilestones]), false); } catch (e) {}
+}
+
+// Confetti burst + celebratory toast when a new completion threshold is crossed.
+function celebrateMilestone(pct) {
+  const messages = {
+    25: '🎉 25% down — the marathon has begun.',
+    50: '🍿 Halfway through the Top 250!',
+    75: '🌟 75% there — the finish line is close.',
+    100: '🏆 All 250 watched. Roll credits.'
+  };
+  showToast(messages[pct] || `🎉 ${pct}% complete!`, { duration: 3200 });
+  buzz([15, 40, 15]);
+
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduceMotion) return;
+
+  const colors = ['#d4a94a', '#a8352a', '#ece3d2', '#8f7638'];
+  const count = 40;
+  for (let i = 0; i < count; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDuration = (1.8 + Math.random() * 1.2) + 's';
+    piece.style.animationDelay = (Math.random() * 0.4) + 's';
+    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    document.body.appendChild(piece);
+    piece.addEventListener('animationend', () => piece.remove());
+    setTimeout(() => piece.remove(), 3600); // safety cleanup if animationend never fires
+  }
+}
+
+function checkMilestones(pct) {
+  if (!milestonesReady) return;
+  MILESTONES.forEach(m => {
+    if (pct >= m && !hitMilestones.has(m)) {
+      hitMilestones.add(m);
+      saveMilestones();
+      celebrateMilestone(m);
+    }
+  });
 }
 
 async function saveCustomMovies() {
@@ -1469,6 +1749,572 @@ function getAllMovies() {
   });
 }
 
+// ===== Surprise Me =====
+function openSheet() { sheetBackdrop.classList.add('show'); }
+function closeSheet() { sheetBackdrop.classList.remove('show'); currentSurprise = null; }
+
+function getUnwatchedPool() {
+  return getAllMovies().filter(m => {
+    const e = state[titleKey(m.title, m.year)];
+    return !(e && e.watched);
+  });
+}
+
+function renderSurprise() {
+  sheetContent.innerHTML = '';
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'sheet-title';
+  titleEl.textContent = '🎲 Surprise Me';
+  sheetContent.appendChild(titleEl);
+
+  const pool = getUnwatchedPool();
+  if (!pool.length) {
+    const p = document.createElement('p');
+    p.style.cssText = 'text-align:center;color:var(--muted);font-family:var(--serif);font-style:italic;padding:20px 0;margin:0;';
+    p.textContent = "You've watched everything on your list. Take a bow.";
+    sheetContent.appendChild(p);
+    currentSurprise = null;
+    openSheet();
+    return;
+  }
+
+  // avoid re-picking the exact same title twice in a row when shuffling
+  let pick;
+  do {
+    pick = pool[Math.floor(Math.random() * pool.length)];
+  } while (pool.length > 1 && currentSurprise && titleKey(pick.title, pick.year) === titleKey(currentSurprise.title, currentSurprise.year));
+  currentSurprise = pick;
+  const key = titleKey(pick.title, pick.year);
+
+  const nameEl = document.createElement('div');
+  nameEl.className = 'surprise-title';
+  nameEl.textContent = pick.title;
+
+  const yearEl = document.createElement('div');
+  yearEl.className = 'surprise-year';
+  yearEl.textContent = pick.custom ? (pick.year + ' · your addition') : (pick.year + ' · #' + pick.rank + ' on the list');
+
+  const actions = document.createElement('div');
+  actions.className = 'surprise-actions';
+
+  const anotherBtn = document.createElement('button');
+  anotherBtn.className = 'modal-btn cancel';
+  anotherBtn.textContent = pool.length > 1 ? 'Another' : 'Shuffle again';
+  anotherBtn.addEventListener('click', () => { buzz(6); renderSurprise(); });
+
+  const watchBtn = document.createElement('button');
+  watchBtn.className = 'modal-btn confirm';
+  watchBtn.textContent = 'Mark watched';
+  watchBtn.addEventListener('click', () => {
+    if (!state[key]) state[key] = { watched: false, date: '' };
+    state[key].watched = true;
+    if (!state[key].date) state[key].date = todayStr();
+    buzz(10);
+    saveState();
+    updateStats();
+    closeSheet();
+    showToast('Marked "' + pick.title + '" as watched');
+    render();
+  });
+
+  actions.appendChild(anotherBtn);
+  actions.appendChild(watchBtn);
+  sheetContent.appendChild(nameEl);
+  sheetContent.appendChild(yearEl);
+  sheetContent.appendChild(actions);
+  openSheet();
+}
+
+surpriseBtn.addEventListener('click', () => { buzz(8); renderSurprise(); });
+sheetClose.addEventListener('click', closeSheet);
+sheetBackdrop.addEventListener('click', (e) => { if (e.target === sheetBackdrop) closeSheet(); });
+
+// ===== Shareable progress card =====
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  const lines = [];
+  for (let i = 0; i < words.length; i++) {
+    const test = line + words[i] + ' ';
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line.trim());
+      line = words[i] + ' ';
+    } else {
+      line = test;
+    }
+  }
+  lines.push(line.trim());
+  lines.forEach((l, i) => ctx.fillText(l, x, y + i * lineHeight));
+  return lines.length;
+}
+
+function drawShareCard() {
+  const ctx = shareCanvas.getContext('2d');
+  const W = shareCanvas.width, H = shareCanvas.height;
+
+  const all = getAllMovies();
+  const total = all.length;
+  const entries = all.map(m => state[titleKey(m.title, m.year)]).filter(v => v && v.watched);
+  const watched = entries.length;
+  const pct = total ? Math.round((watched / total) * 100) : 0;
+  const ratedEntries = entries.filter(v => v.rating > 0);
+  const avgRating = ratedEntries.length
+    ? (ratedEntries.reduce((s, v) => s + v.rating, 0) / ratedEntries.length)
+    : null;
+
+  // background
+  ctx.fillStyle = '#100d0b';
+  ctx.fillRect(0, 0, W, H);
+  const glow = ctx.createRadialGradient(W/2, H*0.38, 40, W/2, H*0.38, W*0.6);
+  glow.addColorStop(0, 'rgba(212,169,74,0.16)');
+  glow.addColorStop(1, 'rgba(212,169,74,0)');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, W, H);
+
+  // sprocket holes top & bottom (film strip motif)
+  ctx.fillStyle = '#3a2f24';
+  const holeY1 = 70, holeY2 = H - 70, holeR = 11, n = 11, margin = 90;
+  for (let i = 0; i < n; i++) {
+    const x = margin + (W - margin * 2) * (i / (n - 1));
+    ctx.beginPath(); ctx.arc(x, holeY1, holeR, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x, holeY2, holeR, 0, Math.PI * 2); ctx.fill();
+  }
+
+  ctx.textAlign = 'center';
+
+  // eyebrow
+  ctx.fillStyle = '#8f7638';
+  ctx.font = '600 26px Inter, sans-serif';
+  ctx.fillText('N O W   S C R E E N I N G', W/2, 190);
+
+  // title
+  ctx.fillStyle = '#d4a94a';
+  ctx.font = '96px "Bebas Neue", Impact, sans-serif';
+  ctx.shadowColor = 'rgba(212,169,74,0.45)';
+  ctx.shadowBlur = 30;
+  ctx.fillText('THE BIG SCREEN', W/2, 300);
+  ctx.shadowBlur = 0;
+
+  ctx.fillStyle = '#beb2a0';
+  ctx.font = 'italic 32px "Source Serif 4", Georgia, serif';
+  ctx.fillText('My Top 250 Ledger', W/2, 350);
+
+  // big stat
+  ctx.fillStyle = '#ece3d2';
+  ctx.font = '220px "Bebas Neue", Impact, sans-serif';
+  ctx.fillText(`${watched} / ${total}`, W/2, 620);
+
+  ctx.fillStyle = '#d4a94a';
+  ctx.font = '54px "Bebas Neue", Impact, sans-serif';
+  ctx.fillText(`${pct}% COMPLETE`, W/2, 690);
+
+  // progress bar
+  const barX = W*0.15, barY = 740, barW = W*0.7, barH = 22;
+  ctx.fillStyle = '#1a1512';
+  roundRect(ctx, barX, barY, barW, barH, 11); ctx.fill();
+  const fillGrad = ctx.createLinearGradient(barX, 0, barX + barW, 0);
+  fillGrad.addColorStop(0, '#a8352a');
+  fillGrad.addColorStop(1, '#d4a94a');
+  ctx.fillStyle = fillGrad;
+  roundRect(ctx, barX, barY, Math.max(barH, barW * (pct/100)), barH, 11); ctx.fill();
+
+  // avg rating (only if they've rated anything)
+  let y = 830;
+  if (avgRating) {
+    ctx.fillStyle = '#a99b87';
+    ctx.font = '30px Inter, sans-serif';
+    ctx.fillText(`★ Average rating you\u2019ve given: ${avgRating.toFixed(1)} / 5`, W/2, y);
+    y += 50;
+  }
+
+  // footer
+  ctx.fillStyle = '#7c7264';
+  ctx.font = '24px Inter, sans-serif';
+  ctx.fillText('Made with The Big Screen', W/2, H - 120);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+async function shareProgress() {
+  buzz(8);
+  showToast('Preparing your card…', { duration: 1500 });
+  try {
+    if (document.fonts && document.fonts.load) {
+      await Promise.all([
+        document.fonts.load('96px "Bebas Neue"'),
+        document.fonts.load('italic 32px "Source Serif 4"')
+      ]);
+    }
+  } catch (e) { /* fonts may fail to preload on some browsers — canvas will fall back gracefully */ }
+
+  drawShareCard();
+
+  shareCanvas.toBlob(async (blob) => {
+    if (!blob) { showToast('Could not generate the image'); return; }
+    const all = getAllMovies();
+    const watched = all.map(m => state[titleKey(m.title, m.year)]).filter(v => v && v.watched).length;
+    const shareText = `I've watched ${watched}/${all.length} of the IMDb Top 250 🎬`;
+    const file = new File([blob], 'big-screen-progress.png', { type: 'image/png' });
+
+    if (navigator.share && (!navigator.canShare || navigator.canShare({ files: [file] }))) {
+      try {
+        await navigator.share({ files: [file], title: 'My Big Screen progress', text: shareText });
+        return;
+      } catch (e) {
+        if (e && e.name === 'AbortError') return; // person cancelled the share sheet — not an error
+        // otherwise fall through to the download fallback below
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'big-screen-progress.png';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    showToast('Image downloaded');
+  }, 'image/png');
+}
+
+shareBtn.addEventListener('click', shareProgress);
+
+// ===== Stats sheet =====
+function buildBarRow(label, count, max) {
+  const row = document.createElement('div');
+  row.className = 'bar-row';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'bar-label';
+  lbl.textContent = label;
+
+  const track = document.createElement('div');
+  track.className = 'bar-track';
+  const fill = document.createElement('div');
+  fill.className = 'bar-fill';
+  fill.style.width = (max > 0 ? Math.max(count > 0 ? 4 : 0, (count / max) * 100) : 0) + '%';
+  track.appendChild(fill);
+
+  const cnt = document.createElement('div');
+  cnt.className = 'bar-count';
+  cnt.textContent = count;
+
+  row.appendChild(lbl);
+  row.appendChild(track);
+  row.appendChild(cnt);
+  return row;
+}
+
+function buildSummaryRow(label, value) {
+  const row = document.createElement('div');
+  row.className = 'stat-summary-row';
+  const a = document.createElement('span'); a.textContent = label;
+  const b = document.createElement('span'); b.textContent = value;
+  row.appendChild(a); row.appendChild(b);
+  return row;
+}
+
+function buildBlockTitle(text) {
+  const t = document.createElement('div');
+  t.className = 'stat-block-title';
+  t.textContent = text;
+  return t;
+}
+
+function renderStats() {
+  sheetContent.innerHTML = '';
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'sheet-title';
+  titleEl.textContent = '📊 Your Stats';
+  sheetContent.appendChild(titleEl);
+
+  const all = getAllMovies();
+  const total = all.length;
+  const watchedEntries = [];
+  const decadeMap = {}; // decade label -> { watched, total }
+
+  all.forEach(m => {
+    const y = parseInt(m.year, 10);
+    const dec = isNaN(y) ? 'Other' : (Math.floor(y / 10) * 10 + 's');
+    if (!decadeMap[dec]) decadeMap[dec] = { watched: 0, total: 0 };
+    decadeMap[dec].total++;
+    const e = state[titleKey(m.title, m.year)];
+    if (e && e.watched) {
+      decadeMap[dec].watched++;
+      watchedEntries.push(e);
+    }
+  });
+
+  const watched = watchedEntries.length;
+  const pct = total ? Math.round((watched / total) * 100) : 0;
+  const ratedEntries = watchedEntries.filter(e => e.rating > 0);
+  const avgRating = ratedEntries.length
+    ? (ratedEntries.reduce((s, e) => s + e.rating, 0) / ratedEntries.length)
+    : null;
+
+  // --- summary ---
+  const summaryBlock = document.createElement('div');
+  summaryBlock.className = 'stat-block';
+  summaryBlock.appendChild(buildSummaryRow('Watched', `${watched} / ${total}`));
+  summaryBlock.appendChild(buildSummaryRow('Complete', `${pct}%`));
+  summaryBlock.appendChild(buildSummaryRow('Your average rating', avgRating ? `★ ${avgRating.toFixed(1)} / 5` : '— (rate a few to see this)'));
+  sheetContent.appendChild(summaryBlock);
+
+  // --- by decade ---
+  const decadeOrder = Object.keys(decadeMap).sort((a, b) => {
+    if (a === 'Other') return 1;
+    if (b === 'Other') return -1;
+    return parseInt(a) - parseInt(b);
+  });
+  if (decadeOrder.length) {
+    const decadeBlock = document.createElement('div');
+    decadeBlock.className = 'stat-block';
+    decadeBlock.appendChild(buildBlockTitle('Watched by decade'));
+    const maxDecadeTotal = Math.max(...decadeOrder.map(d => decadeMap[d].total));
+    decadeOrder.forEach(d => {
+      const { watched: w, total: t } = decadeMap[d];
+      const row = buildBarRow(d, w, maxDecadeTotal);
+      row.querySelector('.bar-count').textContent = `${w}/${t}`;
+      decadeBlock.appendChild(row);
+    });
+    sheetContent.appendChild(decadeBlock);
+  }
+
+  // --- rating distribution ---
+  if (ratedEntries.length) {
+    const ratingBlock = document.createElement('div');
+    ratingBlock.className = 'stat-block';
+    ratingBlock.appendChild(buildBlockTitle('Your ratings'));
+    const counts = [0, 0, 0, 0, 0];
+    ratedEntries.forEach(e => { if (e.rating >= 1 && e.rating <= 5) counts[e.rating - 1]++; });
+    const maxCount = Math.max(...counts);
+    for (let star = 5; star >= 1; star--) {
+      ratingBlock.appendChild(buildBarRow('★'.repeat(star), counts[star - 1], maxCount));
+    }
+    sheetContent.appendChild(ratingBlock);
+  }
+
+  // --- watched over time (last 6 active months) ---
+  const monthMap = {};
+  watchedEntries.forEach(e => {
+    if (!e.date) return;
+    const m = e.date.slice(0, 7); // YYYY-MM
+    monthMap[m] = (monthMap[m] || 0) + 1;
+  });
+  const months = Object.keys(monthMap).sort().slice(-6);
+  if (months.length) {
+    const timeBlock = document.createElement('div');
+    timeBlock.className = 'stat-block';
+    timeBlock.appendChild(buildBlockTitle('Recent activity'));
+    const maxMonth = Math.max(...months.map(m => monthMap[m]));
+    const fmt = (m) => {
+      const [y, mo] = m.split('-');
+      const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return names[parseInt(mo, 10) - 1] + " '" + y.slice(2);
+    };
+    months.forEach(m => timeBlock.appendChild(buildBarRow(fmt(m), monthMap[m], maxMonth)));
+    sheetContent.appendChild(timeBlock);
+  }
+
+  const note = document.createElement('p');
+  note.style.cssText = 'font-size:11px;color:var(--muted2);font-family:var(--sans);margin-top:4px;line-height:1.5;';
+  note.textContent = "Note: this app doesn't store IMDb's own score for each film, so this shows your ratings only — not a comparison against IMDb's.";
+  sheetContent.appendChild(note);
+
+  openSheet();
+}
+
+statsBtn.addEventListener('click', () => { buzz(8); renderStats(); });
+
+// ===== Posters (optional, needs the person's own free TMDB API key) =====
+let posterCacheSaveTimer = null;
+function savePosterCache() {
+  clearTimeout(posterCacheSaveTimer);
+  posterCacheSaveTimer = setTimeout(async () => {
+    try { await window.storage.set(POSTER_CACHE_KEY, JSON.stringify(posterCache), false); } catch (e) {}
+  }, 400);
+}
+async function saveTmdbKey() {
+  try { await window.storage.set(TMDB_KEY_STORAGE, tmdbApiKey, false); } catch (e) {}
+}
+
+function buildPosterEl(key, title, year) {
+  const cached = posterCache[key];
+  if (cached) {
+    const img = document.createElement('img');
+    img.className = 'poster';
+    img.loading = 'lazy';
+    img.alt = title + ' poster';
+    img.src = 'https://image.tmdb.org/t/p/w92' + cached;
+    img.setAttribute('data-poster-key', key);
+    img.addEventListener('error', () => { img.replaceWith(buildPosterPlaceholder(key, title, year)); });
+    return img;
+  }
+  const ph = buildPosterPlaceholder(key, title, year);
+  if (cached === undefined) queuePosterFetch(key, title, year); // never attempted — queue it
+  return ph;
+}
+
+function buildPosterPlaceholder(key, title, year) {
+  const ph = document.createElement('div');
+  ph.className = 'poster-placeholder';
+  ph.setAttribute('data-poster-key', key);
+  ph.textContent = '🎬';
+  return ph;
+}
+
+function queuePosterFetch(key, title, year) {
+  if (posterQueued.has(key)) return;
+  posterQueued.add(key);
+  posterQueue.push({ key, title, year });
+  pumpPosterQueue();
+}
+
+function pumpPosterQueue() {
+  while (posterInFlight < POSTER_CONCURRENCY && posterQueue.length) {
+    const job = posterQueue.shift();
+    posterInFlight++;
+    fetchPoster(job.title, job.year, tmdbApiKey)
+      .then((result) => {
+        if (result.cacheable) {
+          posterCache[job.key] = result.path; // string path, or null meaning "confirmed no poster"
+          savePosterCache();
+          if (result.path) {
+            const el = document.querySelector('[data-poster-key="' + cssEscape(job.key) + '"]');
+            if (el && el.tagName === 'DIV') {
+              const img = document.createElement('img');
+              img.className = 'poster';
+              img.loading = 'lazy';
+              img.alt = job.title + ' poster';
+              img.src = 'https://image.tmdb.org/t/p/w92' + result.path;
+              img.setAttribute('data-poster-key', job.key);
+              img.addEventListener('error', () => { img.replaceWith(buildPosterPlaceholder(job.key, job.title, job.year)); });
+              el.replaceWith(img);
+            }
+          }
+        }
+        // network errors (result.cacheable === false) aren't cached, so a future
+        // render/reload will simply try again rather than being stuck as "no poster" forever
+      })
+      .finally(() => {
+        posterInFlight--;
+        pumpPosterQueue();
+      });
+  }
+}
+
+function cssEscape(s) {
+  return (window.CSS && CSS.escape) ? CSS.escape(s) : s.replace(/["\\\]]/g, '\\$&');
+}
+
+async function fetchPoster(title, year, key) {
+  if (!key) return { path: null, cacheable: false };
+  try {
+    const url = 'https://api.themoviedb.org/3/search/movie?api_key=' + encodeURIComponent(key) +
+      '&query=' + encodeURIComponent(title) + (year && /^\d{4}$/.test(year) ? '&year=' + year : '');
+    const res = await fetch(url);
+    if (!res.ok) return { path: null, cacheable: false }; // e.g. bad key (401) or rate limit (429) — don't cache, allow retry later
+    const data = await res.json();
+    const first = data && data.results && data.results[0];
+    const path = (first && first.poster_path) ? first.poster_path : null;
+    return { path, cacheable: true }; // a genuine "TMDB has no match" is fine to cache
+  } catch (e) {
+    return { path: null, cacheable: false }; // offline / network error — don't cache, allow retry later
+  }
+}
+
+function renderPosterSettings() {
+  sheetContent.innerHTML = '';
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'sheet-title';
+  titleEl.textContent = '🖼️ Poster Settings';
+  sheetContent.appendChild(titleEl);
+
+  const note = document.createElement('p');
+  note.className = 'settings-note';
+  note.innerHTML = 'Posters load from <a href="https://www.themoviedb.org/" target="_blank" rel="noopener">TMDB</a>, which requires a free API key of your own. Create an account, go to Settings → API, request a key (approved instantly for personal use), and paste it below. It\u2019s stored only in this browser \u2014 never sent anywhere except TMDB.';
+  sheetContent.appendChild(note);
+
+  const field = document.createElement('div');
+  field.className = 'settings-field';
+  const label = document.createElement('label');
+  label.textContent = 'TMDB API key (v3 auth)';
+  label.setAttribute('for', 'tmdbKeyInput');
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.id = 'tmdbKeyInput';
+  input.autocomplete = 'off';
+  input.autocapitalize = 'off';
+  input.spellcheck = false;
+  input.placeholder = 'e.g. 1a2b3c4d5e6f...';
+  input.value = tmdbApiKey;
+  field.appendChild(label);
+  field.appendChild(input);
+  sheetContent.appendChild(field);
+
+  const actions = document.createElement('div');
+  actions.className = 'surprise-actions';
+  const clearBtn = document.createElement('button');
+  clearBtn.className = 'modal-btn cancel';
+  clearBtn.textContent = tmdbApiKey ? 'Remove key' : 'Cancel';
+  clearBtn.addEventListener('click', () => {
+    if (tmdbApiKey) {
+      tmdbApiKey = '';
+      saveTmdbKey();
+      showToast('Posters turned off');
+      closeSheet();
+      render();
+    } else {
+      closeSheet();
+    }
+  });
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'modal-btn confirm';
+  saveBtn.textContent = 'Save';
+  saveBtn.addEventListener('click', () => {
+    const val = input.value.trim();
+    tmdbApiKey = val;
+    saveTmdbKey();
+    closeSheet();
+    showToast(val ? 'Posters turned on' : 'Posters turned off');
+    render();
+  });
+  actions.appendChild(clearBtn);
+  actions.appendChild(saveBtn);
+  sheetContent.appendChild(actions);
+
+  if (Object.keys(posterCache).length) {
+    const wipeBtn = document.createElement('button');
+    wipeBtn.className = 'reset-btn';
+    wipeBtn.style.cssText = 'margin-top:14px;width:100%;';
+    wipeBtn.textContent = 'Clear cached posters';
+    wipeBtn.addEventListener('click', async () => {
+      posterCache = {};
+      posterQueued.clear();
+      try { await window.storage.set(POSTER_CACHE_KEY, JSON.stringify(posterCache), false); } catch (e) {}
+      showToast('Poster cache cleared');
+      closeSheet();
+      render();
+    });
+    sheetContent.appendChild(wipeBtn);
+  }
+
+  openSheet();
+}
+
+posterSettingsBtn.addEventListener('click', () => { buzz(8); renderPosterSettings(); });
+
 function updateStats() {
   const all = getAllMovies();
   const total = all.length;
@@ -1488,6 +2334,8 @@ function updateStats() {
 
   const allChip = document.querySelector('.chip[data-filter="all"]');
   if (allChip) allChip.textContent = `All ${total}`;
+
+  checkMilestones(pct);
 }
 
 function getSortedMovies() {
@@ -1508,6 +2356,13 @@ function getSortedMovies() {
       if (!da) return 1;
       if (!db) return -1;
       return db.localeCompare(da);
+    });
+  } else if (sortMode === 'rating') {
+    withIdx.sort((a,b) => {
+      const ra = (state[titleKey(a.title,a.year)] || {}).rating || 0;
+      const rb = (state[titleKey(b.title,b.year)] || {}).rating || 0;
+      if (ra !== rb) return rb - ra; // highest rating first, unrated (0) sink to the bottom
+      return (a.rank||9999) - (b.rank||9999);
     });
   } else {
     // default rank order: numbered ranks first, then custom additions at the end
@@ -1615,6 +2470,7 @@ function render() {
     if (query && !title.toLowerCase().includes(query)) return;
     if (currentFilter === 'watched' && !entry.watched) return;
     if (currentFilter === 'unwatched' && entry.watched) return;
+    if (currentFilter === 'rated' && !(entry.rating > 0)) return;
 
     if (sortMode === 'year' || sortMode === 'yearOld') {
       const d = decadeOf(year);
@@ -1744,6 +2600,9 @@ function render() {
       setTimeout(() => scheduleRemoval(key, title, custom), 230);
     });
 
+    if (tmdbApiKey) {
+      item.appendChild(buildPosterEl(key, title, year));
+    }
     item.appendChild(checkZone);
     item.appendChild(rankBadge);
     item.appendChild(info);
@@ -1760,9 +2619,13 @@ function render() {
   if (shown === 0) {
     const empty = document.createElement('div');
     empty.className = 'empty-state';
-    empty.innerHTML = '<div class="glyph">— · —</div><p>' +
-      (query ? 'No titles match that search.' : currentFilter === 'watched' ? 'The reel is empty. Nothing checked off yet.' : "Everything's been watched. Take a bow.") +
-      '</p>';
+    let msg;
+    if (query) msg = 'No titles match that search.';
+    else if (currentFilter === 'watched') msg = 'The reel is empty. Nothing checked off yet.';
+    else if (currentFilter === 'rated') msg = "You haven't rated anything yet. Tap the ★ icon on a movie to rate it.";
+    else if (currentFilter === 'unwatched') msg = "Everything's been watched. Take a bow.";
+    else msg = 'Nothing here yet.';
+    empty.innerHTML = '<div class="glyph">— · —</div><p>' + msg + '</p>';
     list.appendChild(empty);
   }
 
@@ -1906,6 +2769,7 @@ document.addEventListener('keydown', (e) => {
   }
   if (e.key === 'Escape') {
     if (modalBackdrop.classList.contains('show')) { closeModal(false); return; }
+    if (sheetBackdrop.classList.contains('show')) { closeSheet(); return; }
     if (addForm.classList.contains('open')) {
       addForm.classList.remove('open');
       toggleAddForm.classList.remove('active');
