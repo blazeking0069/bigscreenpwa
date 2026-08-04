@@ -36,6 +36,14 @@
     --serif: 'Source Serif 4', Georgia, serif;
     --display: 'Bebas Neue', Impact, sans-serif;
     --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --content-w: 640px;
+  }
+
+  @media (min-width: 860px) {
+    :root { --content-w: 760px; }
+  }
+  @media (min-width: 1100px) {
+    :root { --content-w: 900px; }
   }
 
   * { box-sizing: border-box; }
@@ -120,7 +128,7 @@
 
   /* ===== FILMSTRIP PROGRESS ===== */
   .strip-wrap {
-    max-width: 640px;
+    max-width: var(--content-w);
     margin: 16px auto 0;
     padding: 0 14px;
   }
@@ -213,7 +221,7 @@
   }
 
   .controls {
-    max-width: 640px;
+    max-width: var(--content-w);
     margin: 0 auto;
     padding: 0 14px;
     display: flex;
@@ -271,7 +279,7 @@
   }
 
   .chip-row {
-    max-width: 640px;
+    max-width: var(--content-w);
     margin: 0 auto;
     padding: 8px 14px 0;
     display: flex;
@@ -310,7 +318,7 @@
   .chip.chip-add.active { background: var(--gold); color: #100d0b; }
 
   .add-form {
-    max-width: 640px;
+    max-width: var(--content-w);
     margin: 0 auto;
     padding: 0 14px;
     display: grid;
@@ -361,9 +369,19 @@
 
   /* ===== LIST ===== */
   .list {
-    max-width: 640px;
+    max-width: var(--content-w);
     margin: 14px auto 0;
     padding: 0 14px;
+  }
+
+  @media (min-width: 860px) {
+    .list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px 12px;
+      align-items: start;
+    }
+    .item { margin-bottom: 0; }
   }
 
   .decade-header {
@@ -376,6 +394,9 @@
     border-bottom: 1px solid var(--border-soft);
   }
   .decade-header:first-child { margin-top: 0; }
+  @media (min-width: 860px) {
+    .decade-header { grid-column: 1 / -1; }
+  }
 
   .item {
     position: relative;
@@ -387,13 +408,17 @@
     align-items: stretch;
     min-height: 58px;
     overflow: hidden;
-    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
     animation: fadeSlideIn 0.28s cubic-bezier(.22,1,.36,1) backwards;
     content-visibility: auto;
     contain-intrinsic-size: 60px;
   }
   .item:hover { border-color: #453a2d; }
   .item:active { transform: scale(0.995); }
+  @media (hover: hover) and (pointer: fine) {
+    .item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.28); transform: translateY(-1px); }
+    .item:active { transform: translateY(-1px) scale(0.995); }
+  }
 
   @keyframes fadeSlideIn {
     from { opacity: 0; transform: translateY(6px); }
@@ -543,6 +568,9 @@
     gap: 12px;
     animation: fadeSlideIn 0.22s cubic-bezier(.22,1,.36,1);
   }
+  @media (min-width: 860px) {
+    .detail-panel { grid-column: 1 / -1; margin: -3px 0 0; }
+  }
   .detail-label {
     font-size: 10.5px;
     letter-spacing: 0.12em;
@@ -661,6 +689,9 @@
     padding: 50px 20px;
     color: var(--muted2);
   }
+  @media (min-width: 860px) {
+    .empty-state { grid-column: 1 / -1; }
+  }
   .empty-state .glyph {
     font-family: var(--display);
     font-size: 40px;
@@ -671,7 +702,7 @@
 
   /* ===== FOOTER / TOAST ===== */
   .footer-note {
-    max-width: 640px;
+    max-width: var(--content-w);
     margin: 30px auto 0;
     padding: 0 14px;
     color: var(--muted2);
@@ -1861,6 +1892,32 @@ importFile.addEventListener('change', () => {
     render();
   };
   reader.readAsText(file);
+});
+
+// Desktop keyboard shortcuts — harmless no-ops on touch-only devices.
+document.addEventListener('keydown', (e) => {
+  const tag = document.activeElement && document.activeElement.tagName;
+  const typing = tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT';
+
+  if (e.key === '/' && !typing) {
+    e.preventDefault();
+    searchBox.focus();
+    return;
+  }
+  if (e.key === 'Escape') {
+    if (modalBackdrop.classList.contains('show')) { closeModal(false); return; }
+    if (addForm.classList.contains('open')) {
+      addForm.classList.remove('open');
+      toggleAddForm.classList.remove('active');
+      return;
+    }
+    if (expandedKey !== null) { expandedKey = null; render(); return; }
+    if (typing && document.activeElement === searchBox && searchBox.value) {
+      searchBox.value = '';
+      searchClear.classList.remove('visible');
+      render();
+    }
+  }
 });
 
 loadState();
