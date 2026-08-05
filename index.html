@@ -711,28 +711,32 @@
     line-height: 1.6;
   }
   .footer-actions {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    justify-content: center;
+  }
+  @media (min-width: 480px) {
+    .footer-actions { grid-template-columns: repeat(3, 1fr); }
   }
   .reset-btn {
     background: none;
     border: 1px solid var(--border);
     color: var(--muted);
-    padding: 9px 14px;
+    padding: 9px 12px;
     min-height: 44px;
     border-radius: 8px;
     font-size: 13px;
+    text-align: center;
     cursor: pointer;
     font-family: var(--sans);
     transition: all 0.15s ease;
-    flex: 1 1 140px;
   }
   .reset-btn:active { transform: scale(0.97); }
   .reset-btn:hover { color: var(--crimson-bright); border-color: var(--crimson); }
   #resetBtn:hover, #resetBtn:active { color: var(--crimson-bright); border-color: var(--crimson); }
-  #exportBtn:hover, #importBtn:hover { color: var(--gold); border-color: var(--gold-dim); }
+  #exportBtn:hover, #importBtn:hover, #statsBtn:hover, #shareBtn:hover, #posterSettingsBtn:hover {
+    color: var(--gold); border-color: var(--gold-dim);
+  }
 
   .toast {
     position: fixed;
@@ -937,6 +941,7 @@
     cursor: pointer;
   }
   .sheet-close:active { color: var(--crimson-bright); }
+  .sheet-close:hover { color: var(--crimson-bright); background: var(--bg-raised-2); }
   .sheet-title {
     font-family: var(--display);
     font-size: 22px;
@@ -1515,7 +1520,6 @@ const REMOVED_KEY = 'imdb-top-250-removed';
 let state = {};
 let currentFilter = 'all';
 let searchDebounce = null;
-let firstRenderDone = false;
 let expandedKey = null; // titleKey of the item whose rating/notes panel is open
 let pendingRemoval = null; // { key, title, custom, timer } awaiting commit, undoable
 const STORAGE_KEY = 'imdb-top-250-progress';
@@ -1831,23 +1835,6 @@ sheetClose.addEventListener('click', closeSheet);
 sheetBackdrop.addEventListener('click', (e) => { if (e.target === sheetBackdrop) closeSheet(); });
 
 // ===== Shareable progress card =====
-function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
-  const words = text.split(' ');
-  let line = '';
-  const lines = [];
-  for (let i = 0; i < words.length; i++) {
-    const test = line + words[i] + ' ';
-    if (ctx.measureText(test).width > maxWidth && line) {
-      lines.push(line.trim());
-      line = words[i] + ' ';
-    } else {
-      line = test;
-    }
-  }
-  lines.push(line.trim());
-  lines.forEach((l, i) => ctx.fillText(l, x, y + i * lineHeight));
-  return lines.length;
-}
 
 function drawShareCard() {
   const ctx = shareCanvas.getContext('2d');
@@ -2044,8 +2031,7 @@ function renderStats() {
   const decadeMap = {}; // decade label -> { watched, total }
 
   all.forEach(m => {
-    const y = parseInt(m.year, 10);
-    const dec = isNaN(y) ? 'Other' : (Math.floor(y / 10) * 10 + 's');
+    const dec = decadeOf(m.year);
     if (!decadeMap[dec]) decadeMap[dec] = { watched: 0, total: 0 };
     decadeMap[dec].total++;
     const e = state[titleKey(m.title, m.year)];
@@ -2072,8 +2058,8 @@ function renderStats() {
 
   // --- by decade ---
   const decadeOrder = Object.keys(decadeMap).sort((a, b) => {
-    if (a === 'Other') return 1;
-    if (b === 'Other') return -1;
+    if (a === 'No year') return 1;
+    if (b === 'No year') return -1;
     return parseInt(a) - parseInt(b);
   });
   if (decadeOrder.length) {
@@ -2202,9 +2188,11 @@ function pumpPosterQueue() {
               el.replaceWith(img);
             }
           }
+        } else {
+          // network error / bad key / rate limit — don't leave it permanently stuck as
+          // "already tried" for the rest of the session; let a later render retry it.
+          posterQueued.delete(job.key);
         }
-        // network errors (result.cacheable === false) aren't cached, so a future
-        // render/reload will simply try again rather than being stuck as "no poster" forever
       })
       .finally(() => {
         posterInFlight--;
