@@ -284,20 +284,24 @@
     padding: 8px 14px 0;
     display: flex;
     gap: 6px;
-    flex-wrap: wrap;
   }
   .chip {
+    flex: 1;
     background: transparent;
     border: 1px solid var(--border);
     color: var(--muted);
-    padding: 9px 14px;
+    padding: 9px 6px;
     border-radius: 999px;
-    font-size: 13px;
+    font-size: 12.5px;
     font-family: var(--sans);
     font-weight: 500;
     cursor: pointer;
     transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
     min-height: 38px;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
@@ -311,9 +315,10 @@
   }
 
   .chip.chip-add {
-    margin-left: auto;
+    flex: 1.5;
     border-color: var(--gold-dim);
     color: var(--gold);
+    font-weight: 600;
   }
   .chip.chip-add.active { background: var(--gold); color: #100d0b; }
 
@@ -897,25 +902,108 @@
   .modal-btn.confirm { background: var(--crimson); color: #fff; border-color: var(--crimson-bright); }
   .modal-btn.confirm:active { background: var(--crimson-bright); }
 
-  /* ===== ICON BUTTON (surprise-me dice) ===== */
-  .icon-btn {
-    flex: 0 0 auto;
-    width: 44px;
-    height: 44px;
-    min-height: 44px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--bg-raised);
-    font-size: 19px;
+  /* ===== SURPRISE ME (ticket-styled CTA) ===== */
+  .surprise-wrap {
+    max-width: var(--content-w);
+    margin: 16px auto 0;
+    padding: 0 14px;
+  }
+  .surprise-ticket {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(135deg, var(--bg-raised) 0%, var(--bg-raised-2) 100%);
+    border: 1px solid var(--gold-dim);
+    border-radius: 14px;
+    padding: 14px 20px;
     cursor: pointer;
+    overflow: hidden;
+    text-align: left;
+    font-family: var(--sans);
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .surprise-ticket::before, .surprise-ticket::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 18px; height: 18px;
+    background: var(--bg);
+    border-radius: 50%;
+    transform: translateY(-50%);
+    box-shadow: 0 0 0 1px var(--gold-dim) inset;
+  }
+  .surprise-ticket::before { left: -9px; }
+  .surprise-ticket::after { right: -9px; }
+  .st-shine {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(232,163,61,0.14) 45%, transparent 60%);
+    background-size: 250% 100%;
+    background-position: 200% 0;
+    pointer-events: none;
+  }
+  .st-icon {
+    flex-shrink: 0;
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: rgba(212,169,74,0.12);
+    color: var(--gold);
     display: flex;
     align-items: center;
     justify-content: center;
-    -webkit-tap-highlight-color: transparent;
-    transition: transform 0.15s ease, border-color 0.15s ease;
+    position: relative;
+    transition: transform 0.2s cubic-bezier(.34,1.56,.64,1);
   }
-  .icon-btn:active { transform: scale(0.9) rotate(-8deg); }
-  .icon-btn:hover { border-color: var(--gold-dim); }
+  .st-icon::after {
+    content: '';
+    position: absolute;
+    right: -14px;
+    top: -6px; bottom: -6px;
+    border-right: 1.5px dashed var(--border);
+  }
+  .st-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .st-title {
+    font-family: var(--display);
+    font-size: 21px;
+    letter-spacing: 0.03em;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .st-sub {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 12.5px;
+    color: var(--cream-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .st-arrow {
+    flex-shrink: 0;
+    color: var(--gold-dim);
+    display: flex;
+    transition: transform 0.2s ease;
+  }
+  .surprise-ticket:active { transform: scale(0.98); }
+  .surprise-ticket:active .st-icon { transform: scale(0.88) rotate(-14deg); }
+  @media (hover: hover) and (pointer: fine) {
+    .surprise-ticket:hover { border-color: var(--gold); transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,0,0,0.35); }
+    .surprise-ticket:hover .st-arrow { transform: translateX(4px); }
+    .surprise-ticket:hover .st-shine { animation: shineSweep 0.9s ease forwards; }
+  }
+  @keyframes shineSweep {
+    from { background-position: 200% 0; }
+    to { background-position: -50% 0; }
+  }
 
   /* ===== SHEET MODAL (surprise / stats / settings) ===== */
   .sheet-card {
@@ -1080,6 +1168,10 @@
     .stat-num { font-size: 19px; }
     .title { font-size: 14px; }
     select { font-size: 14px; }
+    .surprise-ticket { padding: 12px 16px; gap: 10px; }
+    .st-icon { width: 40px; height: 40px; }
+    .st-title { font-size: 18px; }
+    .st-sub { font-size: 11px; }
   }
 
   @media (min-width: 520px) {
@@ -1109,6 +1201,29 @@
   </div>
 </div>
 
+<div class="surprise-wrap">
+  <button class="surprise-ticket" id="surpriseBtn" aria-label="Surprise me with something to watch">
+    <span class="st-shine"></span>
+    <span class="st-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="4.5"/>
+        <circle cx="8.2" cy="8.2" r="1.3" fill="currentColor" stroke="none"/>
+        <circle cx="15.8" cy="8.2" r="1.3" fill="currentColor" stroke="none"/>
+        <circle cx="8.2" cy="15.8" r="1.3" fill="currentColor" stroke="none"/>
+        <circle cx="15.8" cy="15.8" r="1.3" fill="currentColor" stroke="none"/>
+        <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none"/>
+      </svg>
+    </span>
+    <span class="st-text">
+      <span class="st-title">Surprise Me</span>
+      <span class="st-sub">Can't you decide? Roll the dice.</span>
+    </span>
+    <span class="st-arrow">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </span>
+  </button>
+</div>
+
 <div class="sticky-bar">
   <div class="controls">
     <div class="search-box">
@@ -1126,7 +1241,6 @@
       <option value="dateWatched">Sort: Recently watched</option>
       <option value="rating">Sort: My rating</option>
     </select>
-    <button class="icon-btn" id="surpriseBtn" aria-label="Surprise me with something to watch" title="Surprise me">🎲</button>
   </div>
   <div class="chip-row">
     <button class="chip active" data-filter="all">All 250</button>
@@ -1545,6 +1659,29 @@ function decadeOf(year) {
   if (isNaN(y)) return 'No year';
   return Math.floor(y/10)*10 + 's';
 }
+
+// Shrinks a .title element's font-size just enough that long titles fit on a
+// single line without wrapping or being cut off with an ellipsis. Only kicks
+// in when needed (short titles are untouched). Reading scrollWidth on a
+// content-visibility:auto element forces the browser to compute accurate
+// layout for it on demand, so this works correctly even for off-screen rows.
+const TITLE_BASE_SIZE = 15;
+const TITLE_MIN_SIZE = 11;
+function fitTitle(titleEl) {
+  if (!titleEl) return;
+  titleEl.style.fontSize = '';
+  if (titleEl.scrollWidth <= titleEl.clientWidth + 1) return; // already fits
+  const ratio = titleEl.clientWidth / titleEl.scrollWidth;
+  let size = Math.max(TITLE_MIN_SIZE, Math.floor(TITLE_BASE_SIZE * ratio * 10) / 10);
+  titleEl.style.fontSize = size + 'px';
+  let guard = 5; // a few corrective steps in case the estimate undershot
+  while (titleEl.scrollWidth > titleEl.clientWidth + 1 && size > TITLE_MIN_SIZE && guard > 0) {
+    size = Math.max(TITLE_MIN_SIZE, size - 0.5);
+    titleEl.style.fontSize = size + 'px';
+    guard--;
+  }
+}
+
 function buzz(ms) {
   try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
 }
@@ -2494,6 +2631,9 @@ function render() {
       item.classList.toggle('done', state[key].watched);
       dateInput.disabled = !state[key].watched;
       dateInput.value = state[key].date || '';
+      dateInput.addEventListener('transitionend', (e) => {
+        if (e.propertyName === 'width') fitTitle(titleEl);
+      }, { once: true });
       saveState();
       updateStats();
       if (currentFilter !== 'all') {
@@ -2603,6 +2743,8 @@ function render() {
       list.appendChild(buildDetailPanel(key, entry));
     }
   });
+
+  list.querySelectorAll('.title').forEach(fitTitle);
 
   if (shown === 0) {
     const empty = document.createElement('div');
