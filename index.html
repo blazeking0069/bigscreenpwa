@@ -411,18 +411,21 @@
     margin-bottom: 7px;
     display: flex;
     align-items: stretch;
-    min-height: 58px;
+    min-height: 84px;
     overflow: hidden;
     transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
     animation: fadeSlideIn 0.28s cubic-bezier(.22,1,.36,1) backwards;
     content-visibility: auto;
-    contain-intrinsic-size: 60px;
+    contain-intrinsic-size: 90px;
   }
   .item:hover { border-color: #453a2d; }
   .item:active { transform: scale(0.995); }
   @media (hover: hover) and (pointer: fine) {
     .item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.28); transform: translateY(-1px); }
     .item:active { transform: translateY(-1px) scale(0.995); }
+  }
+  @media (min-width: 860px) {
+    .item { min-height: 104px; contain-intrinsic-size: 110px; }
   }
 
   @keyframes fadeSlideIn {
@@ -633,9 +636,12 @@
     font-size: 15px;
     line-height: 1.3;
     color: var(--cream);
-    white-space: nowrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    min-height: 39px; /* reserves 2 lines' worth of space even for short titles, so every row lines up evenly */
   }
   .item.done .title { color: #e6c9c3; }
   .year {
@@ -1121,26 +1127,29 @@
 
   /* ===== POSTER THUMBNAIL ===== */
   .poster {
-    width: 34px;
-    height: 51px;
+    width: 50px;
+    height: 75px;
     flex-shrink: 0;
-    border-radius: 5px;
+    border-radius: 6px;
     object-fit: cover;
     background: var(--bg);
     margin: auto 0 auto 4px;
   }
   .poster-placeholder {
-    width: 34px;
-    height: 51px;
+    width: 50px;
+    height: 75px;
     flex-shrink: 0;
-    border-radius: 5px;
+    border-radius: 6px;
     background: var(--bg);
     margin: auto 0 auto 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--border);
-    font-size: 16px;
+    font-size: 22px;
+  }
+  @media (min-width: 860px) {
+    .poster, .poster-placeholder { width: 64px; height: 96px; font-size: 26px; }
   }
 
   /* ===== CONFETTI ===== */
@@ -1658,28 +1667,6 @@ function decadeOf(year) {
   const y = parseInt(year, 10);
   if (isNaN(y)) return 'No year';
   return Math.floor(y/10)*10 + 's';
-}
-
-// Shrinks a .title element's font-size just enough that long titles fit on a
-// single line without wrapping or being cut off with an ellipsis. Only kicks
-// in when needed (short titles are untouched). Reading scrollWidth on a
-// content-visibility:auto element forces the browser to compute accurate
-// layout for it on demand, so this works correctly even for off-screen rows.
-const TITLE_BASE_SIZE = 15;
-const TITLE_MIN_SIZE = 11;
-function fitTitle(titleEl) {
-  if (!titleEl) return;
-  titleEl.style.fontSize = '';
-  if (titleEl.scrollWidth <= titleEl.clientWidth + 1) return; // already fits
-  const ratio = titleEl.clientWidth / titleEl.scrollWidth;
-  let size = Math.max(TITLE_MIN_SIZE, Math.floor(TITLE_BASE_SIZE * ratio * 10) / 10);
-  titleEl.style.fontSize = size + 'px';
-  let guard = 5; // a few corrective steps in case the estimate undershot
-  while (titleEl.scrollWidth > titleEl.clientWidth + 1 && size > TITLE_MIN_SIZE && guard > 0) {
-    size = Math.max(TITLE_MIN_SIZE, size - 0.5);
-    titleEl.style.fontSize = size + 'px';
-    guard--;
-  }
 }
 
 function buzz(ms) {
@@ -2631,9 +2618,6 @@ function render() {
       item.classList.toggle('done', state[key].watched);
       dateInput.disabled = !state[key].watched;
       dateInput.value = state[key].date || '';
-      dateInput.addEventListener('transitionend', (e) => {
-        if (e.propertyName === 'width') fitTitle(titleEl);
-      }, { once: true });
       saveState();
       updateStats();
       if (currentFilter !== 'all') {
@@ -2743,8 +2727,6 @@ function render() {
       list.appendChild(buildDetailPanel(key, entry));
     }
   });
-
-  list.querySelectorAll('.title').forEach(fitTitle);
 
   if (shown === 0) {
     const empty = document.createElement('div');
