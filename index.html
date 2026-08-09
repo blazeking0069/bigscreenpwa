@@ -202,6 +202,32 @@
     margin-top: 3px;
   }
 
+  .quick-actions {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 14px;
+  }
+  .quick-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    color: var(--cream-dim);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: var(--sans);
+    cursor: pointer;
+    min-height: 38px;
+    transition: border-color 0.15s ease, color 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .quick-btn:active { transform: scale(0.96); }
+  .quick-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+
   /* ===== CONTROLS ===== */
   .sticky-bar {
     position: sticky;
@@ -422,6 +448,10 @@
     contain-intrinsic-size: 138px;
   }
   .item:hover { border-color: #453a2d; }
+  .item:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-color: var(--gold-dim); }
+  .item.dragging { transition: none; }
+  .item.swipe-armed-check { border-color: #5ec98f; box-shadow: inset 0 0 0 1px #5ec98f; }
+  .item.swipe-armed-remove { border-color: var(--crimson-bright); box-shadow: inset 0 0 0 1px var(--crimson-bright); }
   .item:active { transform: scale(0.995); }
   @media (hover: hover) and (pointer: fine) {
     .item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.28); transform: translateY(-1px); }
@@ -738,9 +768,6 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
-  @media (min-width: 480px) {
-    .footer-actions { grid-template-columns: repeat(3, 1fr); }
-  }
   .reset-btn {
     background: none;
     border: 1px solid var(--border);
@@ -757,7 +784,7 @@
   .reset-btn:active { transform: scale(0.97); }
   .reset-btn:hover { color: var(--crimson-bright); border-color: var(--crimson); }
   #resetBtn:hover, #resetBtn:active { color: var(--crimson-bright); border-color: var(--crimson); }
-  #exportBtn:hover, #importBtn:hover, #statsBtn:hover, #shareBtn:hover, #posterSettingsBtn:hover {
+  #exportBtn:hover, #importBtn:hover, #posterSettingsBtn:hover {
     color: var(--gold); border-color: var(--gold-dim);
   }
 
@@ -816,6 +843,55 @@
     width: 6px; height: 6px; border-radius: 50%;
     background: var(--gold);
     flex-shrink: 0;
+  }
+
+  /* ===== HOVER PREVIEW (desktop only) ===== */
+  .hover-preview {
+    position: fixed;
+    width: 200px;
+    background: var(--bg-raised-2);
+    border: 1px solid var(--gold-dim);
+    border-radius: 12px;
+    padding: 14px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+    opacity: 0;
+    transform: translateY(4px);
+    pointer-events: none;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 40;
+  }
+  .hover-preview.show { opacity: 1; transform: translateY(0); }
+  .hp-poster-wrap {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--bg);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--border);
+    font-size: 40px;
+  }
+  .hp-poster-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .hp-title {
+    font-family: var(--serif);
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--cream);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .hp-meta {
+    font-family: var(--sans);
+    font-size: 11.5px;
+    color: var(--muted);
+  }
+  .hp-extra {
+    font-size: 11px;
+    color: var(--gold);
+    margin-top: 6px;
   }
 
   .skeleton-list {
@@ -1227,6 +1303,10 @@
     <div class="stat"><div class="stat-num" id="statYear">0</div><div class="stat-lbl">This year</div></div>
     <div class="stat"><div class="stat-num" id="statLeft">250</div><div class="stat-lbl">Remaining</div></div>
   </div>
+  <div class="quick-actions">
+    <button class="quick-btn" id="statsBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M8 17V10M13 17V6M18 17v-4"/></svg>Stats</button>
+    <button class="quick-btn" id="shareBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg>Share</button>
+  </div>
 </div>
 
 <div class="surprise-wrap">
@@ -1293,8 +1373,6 @@
   Every checkmark, date, note, rating, and any movie you add or remove is stored privately to your account and matched by title, so the ledger survives future updates to the ranking.
   <br><br>
   <div class="footer-actions">
-    <button class="reset-btn" id="statsBtn">📊 Stats</button>
-    <button class="reset-btn" id="shareBtn">Share progress</button>
     <button class="reset-btn" id="posterSettingsBtn">Poster settings</button>
     <button class="reset-btn" id="exportBtn">Export backup</button>
     <button class="reset-btn" id="importBtn">Import backup</button>
@@ -1304,6 +1382,13 @@
 </div>
 
 <div class="toast" id="toast"><span class="dot"></span><span id="toastText">Saved</span><button class="toast-action" id="toastAction"></button></div>
+
+<div class="hover-preview" id="hoverPreview">
+  <div class="hp-poster-wrap" id="hpPosterWrap"></div>
+  <div class="hp-title" id="hpTitle"></div>
+  <div class="hp-meta" id="hpMeta"></div>
+  <div class="hp-extra" id="hpExtra"></div>
+</div>
 
 <canvas id="shareCanvas" width="1080" height="1080" style="display:none"></canvas>
 
@@ -1652,6 +1737,12 @@ const shareBtn = document.getElementById('shareBtn');
 const shareCanvas = document.getElementById('shareCanvas');
 const statsBtn = document.getElementById('statsBtn');
 const posterSettingsBtn = document.getElementById('posterSettingsBtn');
+const hoverPreview = document.getElementById('hoverPreview');
+const hpPosterWrap = document.getElementById('hpPosterWrap');
+const hpTitle = document.getElementById('hpTitle');
+const hpMeta = document.getElementById('hpMeta');
+const hpExtra = document.getElementById('hpExtra');
+const canHover = window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 let currentSurprise = null; // the movie currently shown in the surprise sheet
 
 let customMovies = []; // [[title, year], ...] user-added
@@ -1694,6 +1785,22 @@ function decadeOf(year) {
   if (isNaN(y)) return 'No year';
   return Math.floor(y/10)*10 + 's';
 }
+// Matches a search query against a title, its year, and decade phrasing
+// like "1990s" or "90s" - so searching a decade or a specific year works
+// alongside normal title search.
+function matchesSearch(title, year, rawQuery) {
+  const q = rawQuery.trim().toLowerCase();
+  if (!q) return true;
+  if (title.toLowerCase().includes(q)) return true;
+  if (year && year.includes(q)) return true;
+  const decadeMatch = q.match(/^(\d{2}|\d{4})'?s$/);
+  if (decadeMatch) {
+    let num = decadeMatch[1];
+    if (num.length === 2) num = (parseInt(num, 10) <= 29 ? '20' : '19') + num;
+    if (decadeOf(year) === num + 's') return true;
+  }
+  return false;
+}
 
 function buzz(ms) {
   try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {}
@@ -1710,6 +1817,96 @@ for (let i = 0; i < 8; i++) {
   s.className = 'skeleton-row';
   s.style.animationDelay = (i * 0.06) + 's';
   skeletonList.appendChild(s);
+}
+
+// Desktop-only quick-glance preview shown on row hover (bigger poster if available).
+function showHoverPreview(item, title, year, entry, key) {
+  if (!canHover) return;
+  hpPosterWrap.innerHTML = '';
+  const cached = posterCache[key];
+  if (cached) {
+    const img = document.createElement('img');
+    img.src = 'https://image.tmdb.org/t/p/w342' + cached;
+    img.alt = title + ' poster';
+    hpPosterWrap.appendChild(img);
+  } else {
+    hpPosterWrap.textContent = '🎬';
+  }
+  hpTitle.textContent = title;
+  hpMeta.textContent = year;
+  let extra = '';
+  if (entry.rating) extra = '★'.repeat(entry.rating) + '☆'.repeat(5 - entry.rating);
+  if (entry.watched && entry.date) extra += (extra ? '  ·  ' : '') + 'Watched ' + formatDateShort(entry.date);
+  hpExtra.textContent = extra;
+  hpExtra.style.display = extra ? '' : 'none';
+
+  const rect = item.getBoundingClientRect();
+  const previewWidth = 228;
+  let left = rect.right + 12;
+  if (left + previewWidth > window.innerWidth) left = rect.left - previewWidth - 12;
+  if (left < 8) left = 8;
+  let top = rect.top;
+  const previewHeightEstimate = 320;
+  if (top + previewHeightEstimate > window.innerHeight) top = Math.max(8, window.innerHeight - previewHeightEstimate - 8);
+  hoverPreview.style.left = left + 'px';
+  hoverPreview.style.top = top + 'px';
+  hoverPreview.classList.add('show');
+}
+function hideHoverPreview() {
+  hoverPreview.classList.remove('show');
+}
+
+// Swipe right to check a movie off, swipe left to bring up the delete
+// confirmation - reuses the existing button click handlers so the actual
+// check/remove logic (including the confirm dialog) only lives in one place.
+function wireSwipeGesture(item, checkBtn, removeBtn) {
+  let startX = 0, startY = 0, dragging = false, decided = null, armed = null;
+  const INTENT = 10, COMMIT = 70, MAX = 100;
+
+  item.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    dragging = true;
+    decided = null;
+    armed = null;
+    item.classList.add('dragging');
+  }, { passive: true });
+
+  item.addEventListener('touchmove', (e) => {
+    if (!dragging || e.touches.length !== 1) return;
+    const dx = e.touches[0].clientX - startX;
+    const dy = e.touches[0].clientY - startY;
+    if (!decided) {
+      if (Math.abs(dx) < INTENT && Math.abs(dy) < INTENT) return;
+      decided = Math.abs(dx) > Math.abs(dy) ? 'horizontal' : 'vertical';
+      if (decided === 'vertical') { dragging = false; item.classList.remove('dragging'); return; }
+    }
+    if (decided !== 'horizontal') return;
+    e.preventDefault();
+    const clamped = Math.max(-MAX, Math.min(MAX, dx));
+    item.style.transform = 'translateX(' + clamped + 'px)';
+    const newArmed = clamped > COMMIT ? 'check' : (clamped < -COMMIT ? 'remove' : null);
+    if (newArmed !== armed) {
+      item.classList.remove('swipe-armed-check', 'swipe-armed-remove');
+      if (newArmed) { item.classList.add('swipe-armed-' + newArmed); buzz(8); }
+      armed = newArmed;
+    }
+  }, { passive: false });
+
+  function endSwipe() {
+    if (!dragging) return;
+    dragging = false;
+    item.classList.remove('dragging', 'swipe-armed-check', 'swipe-armed-remove');
+    item.style.transform = '';
+    const finalArmed = armed;
+    armed = null;
+    decided = null;
+    if (finalArmed === 'check') checkBtn.click();
+    else if (finalArmed === 'remove') removeBtn.click();
+  }
+  item.addEventListener('touchend', endSwipe, { passive: true });
+  item.addEventListener('touchcancel', endSwipe, { passive: true });
 }
 
 const toastAction = document.getElementById('toastAction');
@@ -2594,6 +2791,7 @@ function buildDetailPanel(key, entry) {
 }
 
 function render() {
+  hideHoverPreview();
   const query = searchBox.value.trim().toLowerCase();
   const sortMode = sortSelect.value;
   const items = getSortedMovies();
@@ -2605,7 +2803,7 @@ function render() {
     const key = titleKey(title, year);
     const entry = state[key] || { watched: false, date: '' };
 
-    if (query && !title.toLowerCase().includes(query)) return;
+    if (query && !matchesSearch(title, year, query)) return;
     if (currentFilter === 'watched' && !entry.watched) return;
     if (currentFilter === 'unwatched' && entry.watched) return;
     if (currentFilter === 'rated' && !(entry.rating > 0)) return;
@@ -2624,6 +2822,12 @@ function render() {
     const item = document.createElement('div');
     item.className = 'item' + (entry.watched ? ' done' : '');
     item.style.animationDelay = Math.min(shown * 10, 180) + 'ms';
+    item.tabIndex = (shown === 0) ? 0 : -1; // roving tabindex: only one row is a normal Tab stop at a time
+    item.setAttribute('data-row', 'true');
+    if (canHover) {
+      item.addEventListener('mouseenter', () => showHoverPreview(item, title, year, entry, key));
+      item.addEventListener('mouseleave', hideHoverPreview);
+    }
     shown++;
 
     const checkZone = document.createElement('div');
@@ -2772,6 +2976,8 @@ function render() {
     iconStack.appendChild(calendarBtn);
     iconStack.appendChild(removeBtn);
 
+    wireSwipeGesture(item, checkBtn, removeBtn);
+
     item.appendChild(checkZone);
     item.appendChild(rankBadge);
     item.appendChild(info);
@@ -2823,13 +3029,23 @@ chips.forEach(chip => {
   });
 });
 resetBtn.addEventListener('click', async () => {
-  const ok = await showConfirm('Clear every checkmark and date? This cannot be undone.', 'Clear it');
+  const ok = await showConfirm('Clear every checkmark and date? You\'ll have a few seconds to undo it after.', 'Clear it');
   if (!ok) return;
   buzz(12);
+  const snapshot = state;
   state = {};
   try { await window.storage.set(STORAGE_KEY, JSON.stringify(state), false); } catch (e) {}
-  showToast('Ledger cleared');
   render();
+  showToast('Ledger cleared', {
+    actionLabel: 'Undo',
+    duration: 6000,
+    onAction: async () => {
+      state = snapshot;
+      try { await window.storage.set(STORAGE_KEY, JSON.stringify(state), false); } catch (e) {}
+      showToast('Restored');
+      render();
+    }
+  });
 });
 
 toggleAddForm.addEventListener('click', () => {
@@ -2952,6 +3168,28 @@ document.addEventListener('keydown', (e) => {
       searchClear.classList.remove('visible');
       render();
     }
+    return;
+  }
+
+  const onRow = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.row === 'true';
+  if (onRow && (e.key === 'ArrowDown' || e.key === 'ArrowUp')) {
+    e.preventDefault();
+    const rows = Array.from(list.querySelectorAll('.item'));
+    const idx = rows.indexOf(document.activeElement);
+    if (idx === -1) return;
+    const nextIdx = e.key === 'ArrowDown' ? Math.min(idx + 1, rows.length - 1) : Math.max(idx - 1, 0);
+    if (nextIdx === idx) return;
+    rows[idx].tabIndex = -1;
+    rows[nextIdx].tabIndex = 0;
+    rows[nextIdx].focus();
+    rows[nextIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    return;
+  }
+  if (onRow && (e.key === ' ' || e.key === 'Enter')) {
+    e.preventDefault();
+    const cb = document.activeElement.querySelector('.check-btn');
+    if (cb) cb.click();
+    return;
   }
 });
 
