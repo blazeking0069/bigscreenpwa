@@ -42,9 +42,6 @@
   @media (min-width: 860px) {
     :root { --content-w: 920px; }
   }
-  @media (min-width: 1300px) {
-    :root { --content-w: 1200px; }
-  }
 
   * { box-sizing: border-box; }
   html { -webkit-tap-highlight-color: transparent; scroll-behavior: smooth; }
@@ -298,10 +295,14 @@
     -webkit-appearance: none;
     appearance: none;
   }
+  #sortSelect, #genreSelect {
+    flex: 1 1 0;
+    min-width: 0;
+  }
 
   @media (min-width: 460px) {
     .search-box { flex: 1 1 200px; }
-    select { flex: 0 1 170px; }
+    #sortSelect, #genreSelect { flex: 0 1 170px; }
   }
 
   .chip-row {
@@ -383,6 +384,7 @@
   .add-form input[type="text"]:focus { border-color: var(--gold-dim); }
   #addTitle { flex: 1 1 160px; }
   #addYear { flex: 0 1 80px; }
+  #addGenre { flex: 1 1 140px; }
   #addBtn {
     flex: 0 0 auto;
     background: var(--gold);
@@ -413,9 +415,6 @@
       align-items: start;
     }
     .item { margin-bottom: 0; }
-  }
-  @media (min-width: 1300px) {
-    .list { grid-template-columns: repeat(3, 1fr); }
   }
 
   .decade-header {
@@ -1349,6 +1348,9 @@
       <option value="dateWatched">Sort: Recently watched</option>
       <option value="rating">Sort: My rating</option>
     </select>
+    <select id="genreSelect">
+      <option value="all">Genre: All</option>
+    </select>
   </div>
   <div class="chip-row">
     <button class="chip active" data-filter="all">All 250</button>
@@ -1361,6 +1363,7 @@
     <div class="add-form-inner">
       <input type="text" id="addTitle" placeholder="Movie title" autocomplete="off" autocorrect="off" spellcheck="false" />
       <input type="text" inputmode="numeric" id="addYear" placeholder="Year" maxlength="4" />
+      <input type="text" id="addGenre" placeholder="Genre (optional)" autocomplete="off" autocorrect="off" spellcheck="false" />
       <button id="addBtn">Add</button>
     </div>
   </div>
@@ -1449,256 +1452,256 @@ if (typeof window.storage === 'undefined') {
 }
 
 const movies = [
-["The Shawshank Redemption","1994"],
-["The Godfather","1972"],
-["The Dark Knight","2008"],
-["The Godfather Part II","1974"],
-["12 Angry Men","1957"],
-["The Lord of the Rings: The Return of the King","2003"],
-["Schindler's List","1993"],
-["Pulp Fiction","1994"],
-["The Lord of the Rings: The Fellowship of the Ring","2001"],
-["The Good, the Bad and the Ugly","1966"],
-["Forrest Gump","1994"],
-["The Lord of the Rings: The Two Towers","2002"],
-["Fight Club","1999"],
-["Inception","2010"],
-["Star Wars: Episode V - The Empire Strikes Back","1980"],
-["The Matrix","1999"],
-["Goodfellas","1990"],
-["One Flew Over the Cuckoo's Nest","1975"],
-["Seven Samurai","1954"],
-["Se7en","1995"],
-["It's a Wonderful Life","1946"],
-["City of God","2002"],
-["Saving Private Ryan","1998"],
-["Life Is Beautiful","1997"],
-["Interstellar","2014"],
-["The Green Mile","1999"],
-["Star Wars","1977"],
-["Terminator 2: Judgment Day","1991"],
-["Back to the Future","1985"],
-["Spirited Away","2001"],
-["The Silence of the Lambs","1991"],
-["Psycho","1960"],
-["Léon: The Professional","1994"],
-["Parasite","2019"],
-["The Departed","2006"],
-["The Prestige","2006"],
-["American History X","1998"],
-["Whiplash","2014"],
-["Harakiri","1962"],
-["Sunset Blvd.","1950"],
-["Casablanca","1942"],
-["Grave of the Fireflies","1988"],
-["Modern Times","1936"],
-["The Intouchables","2011"],
-["Rear Window","1954"],
-["Alien","1979"],
-["Cinema Paradiso","1990"],
-["City Lights","1931"],
-["Apocalypse Now","1979"],
-["Memento","2001"],
-["Django Unchained","2012"],
-["Raiders of the Lost Ark","1981"],
-["WALL·E","2008"],
-["The Lion King","1994"],
-["Joker","2019"],
-["Oldboy","2003"],
-["The Great Dictator","1940"],
-["Paths of Glory","1957"],
-["Coco","2017"],
-["Your Name.","2016"],
-["The Dark Knight Rises","2012"],
-["Aliens","1986"],
-["The Lives of Others","2006"],
-["Toy Story","1995"],
-["Star Wars: Episode VI - Return of the Jedi","1983"],
-["Witness for the Prosecution","1957"],
-["Braveheart","1995"],
-["Amadeus","1984"],
-["Toy Story 3","2010"],
-["12th Fail","2023"],
-["Once Upon a Time in America","1984"],
-["Reservoir Dogs","1992"],
-["Inglourious Basterds","2009"],
-["Good Will Hunting","1997"],
-["Snatch","2000"],
-["3 Idiots","2009"],
-["Rashômon","1950"],
-["Vertigo","1958"],
-["M","1931"],
-["North by Northwest","1959"],
-["Citizen Kane","1941"],
-["Full Metal Jacket","1987"],
-["Yojimbo","1961"],
-["Scarface","1983"],
-["Singin' in the Rain","1952"],
-["All About Eve","1950"],
-["Judgment at Nuremberg","1961"],
-["Come and See","1985"],
-["Dangal","2016"],
-["2001: A Space Odyssey","1968"],
-["Spider-Man: Across the Spider-Verse","2023"],
-["Bicycle Thieves","1948"],
-["Ikiru","1952"],
-["Taare Zameen Par","2007"],
-["Double Indemnity","1944"],
-["The Sting","1973"],
-["A Clockwork Orange","1971"],
-["The Kid","1921"],
-["Metropolis","1927"],
-["Sherlock Jr.","1924"],
-["Andrei Rublev","1966"],
-["Downfall","2004"],
-["Unforgiven","1992"],
-["Monty Python and the Holy Grail","1975"],
-["Batman Begins","2005"],
-["The Battle of Algiers","1966"],
-["To Kill a Mockingbird","1962"],
-["Ran","1985"],
-["Requiem for a Dream","2000"],
-["Some Like It Hot","1959"],
-["Die Hard","1988"],
-["The Apartment","1960"],
-["Persona","1966"],
-["My Neighbor Totoro","1988"],
-["Star Wars: Episode III - Revenge of the Sith","2005"],
-["The Wages of Fear","1953"],
-["Klaus","2019"],
-["Trainspotting","1996"],
-["Gladiator","2000"],
-["Jaws","1975"],
-["The Sixth Sense","1999"],
-["Green Book","2018"],
-["No Country for Old Men","2007"],
-["Ratatouille","2007"],
-["The Great Escape","1963"],
-["The Elephant Man","1980"],
-["There Will Be Blood","2007"],
-["High and Low","1963"],
-["Princess Mononoke","1997"],
-["Wild Strawberries","1957"],
-["Lawrence of Arabia","1962"],
-["Rocky","1976"],
-["Pather Panchali","1955"],
-["The Wizard of Oz","1939"],
-["Hotel Rwanda","2004"],
-["Mad Max: Fury Road","2015"],
-["The Bridge on the River Kwai","1957"],
-["Chinatown","1974"],
-["On the Waterfront","1954"],
-["Dial M for Murder","1954"],
-["The Treasure of the Sierra Madre","1948"],
-["A Separation","2011"],
-["The Deer Hunter","1978"],
-["Room","2015"],
-["Prisoners","2013"],
-["Rush","2013"],
-["The Big Lebowski","1998"],
-["Barry Lyndon","1975"],
-["Life of Brian","1979"],
-["Warrior","2011"],
-["Anatomy of a Fall","2023"],
-["Memories of Murder","2003"],
-["Pan's Labyrinth","2006"],
-["The Third Man","1949"],
-["The Truman Show","1998"],
-["Blade Runner","1982"],
-["Nausicaä of the Valley of the Wind","1984"],
-["Up","2009"],
-["Kill Bill: Vol. 1","2003"],
-["Sunrise: A Song of Two Humans","1927"],
-["In the Mood for Love","2000"],
-["Project Hail Mary","2026"],
-["The Wolf of Wall Street","2013"],
-["Rebecca","1940"],
-["Network","1976"],
-["Jai Bhim","2021"],
-["Platoon","1986"],
-["Ford v Ferrari","2019"],
-["The Grand Budapest Hotel","2014"],
-["Umberto D.","1952"],
-["Groundhog Day","1993"],
-["Incendies","2010"],
-["Amélie","2001"],
-["It Happened One Night","1934"],
-["Stand by Me","1986"],
-["Diabolique","1955"],
-["Tokyo Story","1953"],
-["La Haine","1995"],
-["L.A. Confidential","1997"],
-["The Help","2011"],
-["The Terminator","1984"],
-["Wild Tales","2014"],
-["Rang De Basanti","2006"],
-["Gone with the Wind","1939"],
-["Logan","2017"],
-["Hamlet","1964"],
-["Barfi!","2012"],
-["Drishyam","2013"],
-["The Shining","1980"],
-["Roman Holiday","1953"],
-["The Best Years of Our Lives","1946"],
-["The Handmaiden","2016"],
-["Gone Girl","2014"],
-["Cinema Paradiso (Nuovo)","1988"],
-["The Man Who Shot Liberty Valance","1962"],
-["Anand","1971"],
-["Spider-Man: Into the Spider-Verse","2018"],
-["Fanny and Alexander","1982"],
-["Persepolis","2007"],
-["Django","1966"],
-["Big Fish","2003"],
-["La Strada","1954"],
-["Mr. Smith Goes to Washington","1939"],
-["Slumdog Millionaire","2008"],
-["Shutter Island","2010"],
-["Millennium Actress","2001"],
-["The Passion of Joan of Arc","1928"],
-["Aladdin","1992"],
-["Ip Man","2008"],
-["A Beautiful Mind","2001"],
-["Sonatine","1993"],
-["Beauty and the Beast","1946"],
-["Children of Heaven","1997"],
-["The Passion of Joan of Arc (Dreyer)","1928"],
-["Toy Story 4","2019"],
-["Manchester by the Sea","2016"],
-["Portrait of a Lady on Fire","2019"],
-["Andhadhun","2018"],
-["Once Upon a Time in the West","1968"],
-["Fargo","1996"],
-["Dersu Uzala","1975"],
-["Pirates of the Caribbean: The Curse of the Black Pearl","2003"],
-["Contempt","1963"],
-["Millennium Mambo","2001"],
-["The Battle of Algiers (Algeri)","1966"],
-["Perfect Blue","1997"],
-["Jurassic Park","1993"],
-["Munna Bhai M.B.B.S.","2003"],
-["Nayakan","1987"],
-["Aparajito","1956"],
-["Amores Perros","2000"],
-["Uri: The Surgical Strike","2019"],
-["Gone Baby Gone","2007"],
-["Monsters, Inc.","2001"],
-["Fanaa","2006"],
-["Black Book","2006"],
-["Big Hero 6","2014"],
-["Vikram Vedha","2017"],
-["Aguirre, the Wrath of God","1972"],
-["Autumn Sonata","1978"],
-["Life of Pi","2012"],
-["Har Har Mahadev","2022"],
-["Queen","2013"],
-["Local Hero","1983"],
-["Cool Hand Luke","1967"],
-["Gangs of Wasseypur","2012"],
-["The General","1926"],
-["1917","2019"],
-["Harry Potter and the Deathly Hallows: Part 2","2011"],
-["Top Gun: Maverick","2022"]
+["The Shawshank Redemption","1994","Drama"],
+["The Godfather","1972","Crime, Drama"],
+["The Dark Knight","2008","Action, Crime, Drama"],
+["The Godfather Part II","1974","Crime, Drama"],
+["12 Angry Men","1957","Crime, Drama"],
+["The Lord of the Rings: The Return of the King","2003","Adventure, Fantasy, Action"],
+["Schindler's List","1993","Drama, History, War"],
+["Pulp Fiction","1994","Crime, Drama"],
+["The Lord of the Rings: The Fellowship of the Ring","2001","Adventure, Fantasy, Action"],
+["The Good, the Bad and the Ugly","1966","Western, Adventure"],
+["Forrest Gump","1994","Drama, Romance, Comedy"],
+["The Lord of the Rings: The Two Towers","2002","Adventure, Fantasy, Action"],
+["Fight Club","1999","Drama, Thriller"],
+["Inception","2010","Sci-Fi, Action, Thriller"],
+["Star Wars: Episode V - The Empire Strikes Back","1980","Sci-Fi, Adventure, Action"],
+["The Matrix","1999","Sci-Fi, Action"],
+["Goodfellas","1990","Crime, Drama, Biography"],
+["One Flew Over the Cuckoo's Nest","1975","Drama"],
+["Seven Samurai","1954","Action, Drama, Adventure"],
+["Se7en","1995","Crime, Drama, Thriller, Mystery"],
+["It's a Wonderful Life","1946","Drama, Family, Fantasy"],
+["City of God","2002","Crime, Drama"],
+["Saving Private Ryan","1998","War, Drama, Action"],
+["Life Is Beautiful","1997","Drama, Comedy, Romance"],
+["Interstellar","2014","Sci-Fi, Adventure, Drama"],
+["The Green Mile","1999","Drama, Fantasy, Crime"],
+["Star Wars","1977","Sci-Fi, Adventure, Action"],
+["Terminator 2: Judgment Day","1991","Sci-Fi, Action"],
+["Back to the Future","1985","Sci-Fi, Adventure, Comedy"],
+["Spirited Away","2001","Animation, Adventure, Fantasy, Family"],
+["The Silence of the Lambs","1991","Thriller, Crime, Horror"],
+["Psycho","1960","Horror, Thriller, Mystery"],
+["Léon: The Professional","1994","Crime, Drama, Thriller, Action"],
+["Parasite","2019","Drama, Thriller, Comedy"],
+["The Departed","2006","Crime, Drama, Thriller"],
+["The Prestige","2006","Drama, Mystery, Sci-Fi, Thriller"],
+["American History X","1998","Drama, Crime"],
+["Whiplash","2014","Drama, Music"],
+["Harakiri","1962","Drama, Action"],
+["Sunset Blvd.","1950","Drama, Romance"],
+["Casablanca","1942","Drama, Romance, War"],
+["Grave of the Fireflies","1988","Animation, Drama, War"],
+["Modern Times","1936","Comedy, Drama, Family"],
+["The Intouchables","2011","Drama, Comedy, Biography"],
+["Rear Window","1954","Mystery, Thriller"],
+["Alien","1979","Horror, Sci-Fi, Thriller"],
+["Cinema Paradiso","1990","Drama, Romance"],
+["City Lights","1931","Comedy, Drama, Romance"],
+["Apocalypse Now","1979","War, Drama"],
+["Memento","2001","Mystery, Thriller"],
+["Django Unchained","2012","Western, Drama, Action"],
+["Raiders of the Lost Ark","1981","Adventure, Action"],
+["WALL·E","2008","Animation, Adventure, Sci-Fi, Family"],
+["The Lion King","1994","Animation, Adventure, Drama, Family"],
+["Joker","2019","Crime, Drama, Thriller"],
+["Oldboy","2003","Action, Drama, Mystery, Thriller"],
+["The Great Dictator","1940","Comedy, Drama, War"],
+["Paths of Glory","1957","Drama, War"],
+["Coco","2017","Animation, Adventure, Family, Fantasy, Music"],
+["Your Name.","2016","Animation, Drama, Fantasy, Romance"],
+["The Dark Knight Rises","2012","Action, Drama, Thriller"],
+["Aliens","1986","Sci-Fi, Action, Horror"],
+["The Lives of Others","2006","Drama, Thriller"],
+["Toy Story","1995","Animation, Adventure, Comedy, Family"],
+["Star Wars: Episode VI - Return of the Jedi","1983","Sci-Fi, Adventure, Action"],
+["Witness for the Prosecution","1957","Mystery, Drama, Crime"],
+["Braveheart","1995","Action, Drama, War, History, Biography"],
+["Amadeus","1984","Drama, Music, Biography, History"],
+["Toy Story 3","2010","Animation, Adventure, Comedy, Family"],
+["12th Fail","2023","Drama, Biography"],
+["Once Upon a Time in America","1984","Crime, Drama"],
+["Reservoir Dogs","1992","Crime, Thriller"],
+["Inglourious Basterds","2009","War, Drama, Action"],
+["Good Will Hunting","1997","Drama, Romance"],
+["Snatch","2000","Crime, Comedy, Action"],
+["3 Idiots","2009","Comedy, Drama"],
+["Rashômon","1950","Drama, Crime, Mystery"],
+["Vertigo","1958","Mystery, Thriller, Romance"],
+["M","1931","Crime, Thriller, Drama"],
+["North by Northwest","1959","Thriller, Mystery, Action"],
+["Citizen Kane","1941","Drama, Mystery"],
+["Full Metal Jacket","1987","War, Drama"],
+["Yojimbo","1961","Action, Drama, Adventure"],
+["Scarface","1983","Crime, Drama"],
+["Singin' in the Rain","1952","Comedy, Musical, Romance"],
+["All About Eve","1950","Drama"],
+["Judgment at Nuremberg","1961","Drama, War, History"],
+["Come and See","1985","War, Drama"],
+["Dangal","2016","Biography, Drama, Sport, Family"],
+["2001: A Space Odyssey","1968","Sci-Fi, Adventure, Mystery"],
+["Spider-Man: Across the Spider-Verse","2023","Animation, Action, Adventure, Sci-Fi"],
+["Bicycle Thieves","1948","Drama"],
+["Ikiru","1952","Drama"],
+["Taare Zameen Par","2007","Drama, Family"],
+["Double Indemnity","1944","Crime, Drama"],
+["The Sting","1973","Crime, Comedy, Drama"],
+["A Clockwork Orange","1971","Crime, Drama, Sci-Fi"],
+["The Kid","1921","Comedy, Drama, Family"],
+["Metropolis","1927","Sci-Fi, Drama"],
+["Sherlock Jr.","1924","Comedy, Action, Romance"],
+["Andrei Rublev","1966","Drama, History, Biography"],
+["Downfall","2004","Drama, War, History, Biography"],
+["Unforgiven","1992","Western, Drama"],
+["Monty Python and the Holy Grail","1975","Comedy, Adventure, Fantasy"],
+["Batman Begins","2005","Action, Adventure, Crime"],
+["The Battle of Algiers","1966","War, Drama, History"],
+["To Kill a Mockingbird","1962","Drama, Crime"],
+["Ran","1985","Drama, War, Action"],
+["Requiem for a Dream","2000","Drama"],
+["Some Like It Hot","1959","Comedy, Romance, Crime"],
+["Die Hard","1988","Action, Thriller"],
+["The Apartment","1960","Comedy, Drama, Romance"],
+["Persona","1966","Drama"],
+["My Neighbor Totoro","1988","Animation, Family, Fantasy"],
+["Star Wars: Episode III - Revenge of the Sith","2005","Sci-Fi, Adventure, Action, Drama"],
+["The Wages of Fear","1953","Adventure, Drama, Thriller"],
+["Klaus","2019","Animation, Adventure, Comedy, Family"],
+["Trainspotting","1996","Drama, Crime, Comedy"],
+["Gladiator","2000","Action, Adventure, Drama"],
+["Jaws","1975","Adventure, Thriller, Horror"],
+["The Sixth Sense","1999","Drama, Mystery, Thriller, Horror"],
+["Green Book","2018","Drama, Comedy, Biography"],
+["No Country for Old Men","2007","Crime, Drama, Thriller"],
+["Ratatouille","2007","Animation, Adventure, Comedy, Family"],
+["The Great Escape","1963","Adventure, Drama, War, History"],
+["The Elephant Man","1980","Drama, Biography"],
+["There Will Be Blood","2007","Drama"],
+["High and Low","1963","Crime, Drama, Thriller, Mystery"],
+["Princess Mononoke","1997","Animation, Adventure, Fantasy, Drama"],
+["Wild Strawberries","1957","Drama"],
+["Lawrence of Arabia","1962","Adventure, Drama, War, Biography, History"],
+["Rocky","1976","Drama, Sport"],
+["Pather Panchali","1955","Drama"],
+["The Wizard of Oz","1939","Adventure, Family, Fantasy, Musical"],
+["Hotel Rwanda","2004","Drama, History, War, Biography"],
+["Mad Max: Fury Road","2015","Action, Adventure, Sci-Fi"],
+["The Bridge on the River Kwai","1957","Adventure, Drama, War"],
+["Chinatown","1974","Mystery, Drama, Thriller, Crime"],
+["On the Waterfront","1954","Crime, Drama"],
+["Dial M for Murder","1954","Mystery, Thriller, Crime"],
+["The Treasure of the Sierra Madre","1948","Adventure, Drama, Western"],
+["A Separation","2011","Drama"],
+["The Deer Hunter","1978","Drama, War"],
+["Room","2015","Drama, Thriller"],
+["Prisoners","2013","Drama, Mystery, Thriller, Crime"],
+["Rush","2013","Action, Biography, Drama, Sport"],
+["The Big Lebowski","1998","Comedy, Crime"],
+["Barry Lyndon","1975","Drama, War, Romance, History"],
+["Life of Brian","1979","Comedy"],
+["Warrior","2011","Drama, Sport, Action"],
+["Anatomy of a Fall","2023","Drama, Mystery, Crime"],
+["Memories of Murder","2003","Crime, Drama, Mystery, Thriller"],
+["Pan's Labyrinth","2006","Fantasy, Drama, War"],
+["The Third Man","1949","Mystery, Thriller"],
+["The Truman Show","1998","Comedy, Drama, Sci-Fi"],
+["Blade Runner","1982","Sci-Fi, Thriller, Action"],
+["Nausicaä of the Valley of the Wind","1984","Animation, Adventure, Fantasy, Sci-Fi"],
+["Up","2009","Animation, Adventure, Comedy, Family, Drama"],
+["Kill Bill: Vol. 1","2003","Action, Crime, Thriller"],
+["Sunrise: A Song of Two Humans","1927","Drama, Romance"],
+["In the Mood for Love","2000","Drama, Romance"],
+["Project Hail Mary","2026","Sci-Fi, Adventure, Drama"],
+["The Wolf of Wall Street","2013","Comedy, Crime, Drama, Biography"],
+["Rebecca","1940","Mystery, Drama, Romance, Thriller"],
+["Network","1976","Drama, Comedy"],
+["Jai Bhim","2021","Drama, Crime"],
+["Platoon","1986","War, Drama"],
+["Ford v Ferrari","2019","Action, Biography, Drama, Sport"],
+["The Grand Budapest Hotel","2014","Comedy, Adventure, Drama"],
+["Umberto D.","1952","Drama"],
+["Groundhog Day","1993","Comedy, Fantasy, Romance"],
+["Incendies","2010","Drama, Mystery, War"],
+["Amélie","2001","Comedy, Romance, Fantasy"],
+["It Happened One Night","1934","Comedy, Romance"],
+["Stand by Me","1986","Drama, Adventure"],
+["Diabolique","1955","Horror, Mystery, Thriller"],
+["Tokyo Story","1953","Drama"],
+["La Haine","1995","Crime, Drama"],
+["L.A. Confidential","1997","Crime, Drama, Mystery, Thriller"],
+["The Help","2011","Drama"],
+["The Terminator","1984","Sci-Fi, Action, Thriller"],
+["Wild Tales","2014","Comedy, Drama, Thriller"],
+["Rang De Basanti","2006","Drama, Comedy"],
+["Gone with the Wind","1939","Drama, Romance, War, History"],
+["Logan","2017","Action, Drama, Sci-Fi"],
+["Hamlet","1964","Drama"],
+["Barfi!","2012","Comedy, Drama, Romance"],
+["Drishyam","2013","Thriller, Drama, Crime, Mystery"],
+["The Shining","1980","Horror, Drama, Thriller"],
+["Roman Holiday","1953","Comedy, Romance"],
+["The Best Years of Our Lives","1946","Drama, War, Romance"],
+["The Handmaiden","2016","Drama, Thriller, Romance"],
+["Gone Girl","2014","Drama, Thriller, Mystery"],
+["Cinema Paradiso (Nuovo)","1988","Drama, Romance"],
+["The Man Who Shot Liberty Valance","1962","Western, Drama"],
+["Anand","1971","Drama"],
+["Spider-Man: Into the Spider-Verse","2018","Animation, Action, Adventure, Sci-Fi"],
+["Fanny and Alexander","1982","Drama, Fantasy, Family"],
+["Persepolis","2007","Animation, Drama, War, Biography"],
+["Django","1966","Western"],
+["Big Fish","2003","Adventure, Drama, Fantasy"],
+["La Strada","1954","Drama"],
+["Mr. Smith Goes to Washington","1939","Drama, Comedy"],
+["Slumdog Millionaire","2008","Drama, Romance"],
+["Shutter Island","2010","Mystery, Thriller, Drama"],
+["Millennium Actress","2001","Animation, Drama, Romance, Fantasy"],
+["The Passion of Joan of Arc","1928","Drama, Biography, History"],
+["Aladdin","1992","Animation, Adventure, Family, Fantasy, Musical"],
+["Ip Man","2008","Action, Biography, Drama"],
+["A Beautiful Mind","2001","Drama, Biography"],
+["Sonatine","1993","Crime, Drama, Action"],
+["Beauty and the Beast","1946","Animation, Family, Fantasy, Musical, Romance"],
+["Children of Heaven","1997","Drama, Family"],
+["The Passion of Joan of Arc (Dreyer)","1928","Drama, Biography, History"],
+["Toy Story 4","2019","Animation, Adventure, Comedy, Family"],
+["Manchester by the Sea","2016","Drama"],
+["Portrait of a Lady on Fire","2019","Drama, Romance"],
+["Andhadhun","2018","Thriller, Comedy, Crime, Mystery"],
+["Once Upon a Time in the West","1968","Western, Drama"],
+["Fargo","1996","Crime, Drama, Thriller"],
+["Dersu Uzala","1975","Adventure, Drama"],
+["Pirates of the Caribbean: The Curse of the Black Pearl","2003","Adventure, Fantasy, Action"],
+["Contempt","1963","Drama"],
+["Millennium Mambo","2001","Drama, Romance"],
+["The Battle of Algiers (Algeri)","1966","War, Drama, History"],
+["Perfect Blue","1997","Animation, Thriller, Horror, Mystery"],
+["Jurassic Park","1993","Adventure, Sci-Fi, Action"],
+["Munna Bhai M.B.B.S.","2003","Comedy, Drama"],
+["Nayakan","1987","Crime, Drama"],
+["Aparajito","1956","Drama"],
+["Amores Perros","2000","Drama, Thriller"],
+["Uri: The Surgical Strike","2019","Action, Drama, War"],
+["Gone Baby Gone","2007","Crime, Drama, Mystery, Thriller"],
+["Monsters, Inc.","2001","Animation, Adventure, Comedy, Family"],
+["Fanaa","2006","Romance, Drama, Action"],
+["Black Book","2006","War, Drama, Thriller"],
+["Big Hero 6","2014","Animation, Action, Adventure, Comedy, Family, Sci-Fi"],
+["Vikram Vedha","2017","Action, Crime, Thriller"],
+["Aguirre, the Wrath of God","1972","Adventure, Drama, History"],
+["Autumn Sonata","1978","Drama"],
+["Life of Pi","2012","Adventure, Drama, Fantasy"],
+["Har Har Mahadev","2022","Action, Drama, History"],
+["Queen","2013","Comedy, Drama"],
+["Local Hero","1983","Comedy, Drama"],
+["Cool Hand Luke","1967","Crime, Drama"],
+["Gangs of Wasseypur","2012","Crime, Drama, Action"],
+["The General","1926","Comedy, Action, Adventure"],
+["1917","2019","War, Drama, Action"],
+["Harry Potter and the Deathly Hallows: Part 2","2011","Adventure, Fantasy, Family"],
+["Top Gun: Maverick","2022","Action, Drama"],
 ];
 
 const list = document.getElementById('list');
@@ -1719,6 +1722,8 @@ const toggleAddForm = document.getElementById('toggleAddForm');
 const addForm = document.getElementById('addForm');
 const addTitle = document.getElementById('addTitle');
 const addYear = document.getElementById('addYear');
+const addGenre = document.getElementById('addGenre');
+const genreSelect = document.getElementById('genreSelect');
 const addBtn = document.getElementById('addBtn');
 const exportBtn = document.getElementById('exportBtn');
 const importBtn = document.getElementById('importBtn');
@@ -1752,6 +1757,7 @@ const REMOVED_KEY = 'imdb-top-250-removed';
 
 let state = {};
 let currentFilter = 'all';
+let currentGenre = 'all';
 let searchDebounce = null;
 let expandedKey = null; // titleKey of the item whose rating/notes panel is open
 let pendingRemoval = null; // { key, title, custom, timer } awaiting commit, undoable
@@ -1785,14 +1791,37 @@ function decadeOf(year) {
   if (isNaN(y)) return 'No year';
   return Math.floor(y/10)*10 + 's';
 }
+
+// Rebuilds the genre dropdown from whatever genres actually exist right now
+// (the 250 built-in movies plus anything introduced via custom additions).
+function populateGenreOptions() {
+  const set = new Set();
+  getAllMovies().forEach(m => {
+    if (!m.genres) return;
+    m.genres.split(',').forEach(g => { const t = g.trim(); if (t) set.add(t); });
+  });
+  const sorted = [...set].sort((a, b) => a.localeCompare(b));
+  const prevValue = genreSelect.value;
+  genreSelect.innerHTML = '<option value="all">Genre: All</option>';
+  sorted.forEach(g => {
+    const opt = document.createElement('option');
+    opt.value = g;
+    opt.textContent = g;
+    genreSelect.appendChild(opt);
+  });
+  if (sorted.includes(prevValue)) genreSelect.value = prevValue;
+  else if (prevValue !== 'all') { currentGenre = 'all'; genreSelect.value = 'all'; }
+}
+
 // Matches a search query against a title, its year, and decade phrasing
 // like "1990s" or "90s" - so searching a decade or a specific year works
 // alongside normal title search.
-function matchesSearch(title, year, rawQuery) {
+function matchesSearch(title, year, genres, rawQuery) {
   const q = rawQuery.trim().toLowerCase();
   if (!q) return true;
   if (title.toLowerCase().includes(q)) return true;
   if (year && year.includes(q)) return true;
+  if (genres && genres.toLowerCase().includes(q)) return true;
   const decadeMatch = q.match(/^(\d{2}|\d{4})'?s$/);
   if (decadeMatch) {
     let num = decadeMatch[1];
@@ -2034,6 +2063,7 @@ async function loadState() {
     if (pc && pc.value) posterCache = JSON.parse(pc.value);
   } catch (e) { posterCache = {}; }
 
+  populateGenreOptions();
   render();
 }
 
@@ -2090,8 +2120,8 @@ async function saveRemovedKeys() {
 }
 
 function getAllMovies() {
-  const base = movies.map((m, idx) => ({ title: m[0], year: m[1], rank: idx + 1, custom: false }));
-  const added = customMovies.map(m => ({ title: m[0], year: m[1], rank: null, custom: true }));
+  const base = movies.map((m, idx) => ({ title: m[0], year: m[1], genres: m[2] || '', rank: idx + 1, custom: false }));
+  const added = customMovies.map(m => ({ title: m[0], year: m[1], genres: m[2] || '', rank: null, custom: true }));
   return base.concat(added).filter(m => {
     const k = titleKey(m.title, m.year);
     if (removedKeys.has(k)) return false;
@@ -2739,6 +2769,7 @@ function commitRemoval(pending) {
   delete state[pending.key];
   saveState();
   if (pendingRemoval === pending) pendingRemoval = null;
+  populateGenreOptions();
   render();
 }
 
@@ -2799,11 +2830,12 @@ function render() {
   let shown = 0;
   let lastDecade = null;
 
-  items.forEach(({title, year, rank, custom}, i) => {
+  items.forEach(({title, year, genres, rank, custom}, i) => {
     const key = titleKey(title, year);
     const entry = state[key] || { watched: false, date: '' };
 
-    if (query && !matchesSearch(title, year, query)) return;
+    if (query && !matchesSearch(title, year, genres, query)) return;
+    if (currentGenre !== 'all' && !(genres && genres.toLowerCase().includes(currentGenre.toLowerCase()))) return;
     if (currentFilter === 'watched' && !entry.watched) return;
     if (currentFilter === 'unwatched' && entry.watched) return;
     if (currentFilter === 'rated' && !(entry.rating > 0)) return;
@@ -3018,6 +3050,7 @@ searchClear.addEventListener('click', () => {
   render();
 });
 sortSelect.addEventListener('change', render);
+genreSelect.addEventListener('change', () => { currentGenre = genreSelect.value; render(); });
 chips.forEach(chip => {
   chip.addEventListener('click', () => {
     if (chip.classList.contains('active')) return;
@@ -3063,17 +3096,20 @@ window.addEventListener('scroll', () => {
 function handleAddMovie() {
   const title = addTitle.value.trim();
   const year = addYear.value.trim();
+  const genre = addGenre.value.trim();
   if (!title) { addTitle.focus(); return; }
   if (year && !/^\d{4}$/.test(year)) { showToast('Enter a 4-digit year, or leave it blank'); addYear.focus(); return; }
   const key = titleKey(title, year || '—');
   const exists = getAllMovies().some(m => titleKey(m.title, m.year) === key);
   if (exists) { showToast('Already on your list'); return; }
-  customMovies.push([title, year || '—']);
+  customMovies.push([title, year || '—', genre]);
   saveCustomMovies();
   addTitle.value = '';
   addYear.value = '';
+  addGenre.value = '';
   buzz(10);
   showToast('Added "' + title + '"');
+  populateGenreOptions();
   render();
 }
 addBtn.addEventListener('click', handleAddMovie);
@@ -3136,6 +3172,7 @@ importFile.addEventListener('change', () => {
       await saveRemovedKeys();
     } catch (e) {}
     showToast('Backup imported');
+    populateGenreOptions();
     render();
   };
   reader.readAsText(file);
