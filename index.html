@@ -1211,6 +1211,26 @@
     margin-bottom: 14px;
   }
   .settings-note a { color: var(--gold-dim); }
+  .settings-note strong { color: var(--cream); }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--gold);
+    color: #100d0b;
+    border: none;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 14px;
+    padding: 13px;
+    border-radius: 9px;
+    cursor: pointer;
+    min-height: 46px;
+    transition: opacity 0.15s ease, transform 0.1s ease;
+  }
+  .submit-btn:disabled { opacity: 0.5; cursor: default; }
+  .submit-btn:not(:disabled):active { transform: scale(0.98); }
+
+  .quick-btn.synced { border-color: var(--gold-dim); color: var(--gold); }
 
   /* ===== POSTER THUMBNAIL ===== */
   .poster {
@@ -1305,6 +1325,7 @@
   <div class="quick-actions">
     <button class="quick-btn" id="statsBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M8 17V10M13 17V6M18 17v-4"/></svg>Stats</button>
     <button class="quick-btn" id="shareBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-3.8M8.6 13.4l6.8 3.8"/></svg>Share</button>
+    <button class="quick-btn" id="accountBtn"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg><span id="accountBtnLabel">Sync</span></button>
   </div>
 </div>
 
@@ -1414,6 +1435,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 // window.storage is provided by Claude's own artifact preview. Outside that
 // environment (e.g. hosted on GitHub Pages), it doesn't exist — so we fall
@@ -1450,6 +1472,13 @@ if (typeof window.storage === 'undefined') {
     }
   };
 }
+
+// ---- cross-device sync (optional - only active once signed in) ----
+const SUPABASE_URL = 'https://uxlqtjipwxycgkqjkedm.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_PYH1oe02Du74IxNK4FS9LQ_sh40cBJJ';
+const sb = (window.supabase && window.supabase.createClient)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  : null;
 
 const movies = [
 ["The Shawshank Redemption","1994","Drama"],
@@ -1739,6 +1768,11 @@ const sheetBackdrop = document.getElementById('sheetBackdrop');
 const sheetContent = document.getElementById('sheetContent');
 const sheetClose = document.getElementById('sheetClose');
 const shareBtn = document.getElementById('shareBtn');
+const accountBtn = document.getElementById('accountBtn');
+const accountBtnLabel = document.getElementById('accountBtnLabel');
+let currentUser = null; // {id, email} once signed in, else null
+let cloudPushTimer = null;
+let syncing = false;
 const shareCanvas = document.getElementById('shareCanvas');
 const statsBtn = document.getElementById('statsBtn');
 const posterSettingsBtn = document.getElementById('posterSettingsBtn');
@@ -2009,6 +2043,7 @@ function saveState() {
       showToast('Save failed — check connection');
     }
   }, 220);
+  scheduleCloudPush();
 }
 
 async function loadState() {
@@ -2114,9 +2149,11 @@ function checkMilestones(pct) {
 
 async function saveCustomMovies() {
   try { await window.storage.set(CUSTOM_KEY, JSON.stringify(customMovies), false); } catch (e) {}
+  scheduleCloudPush();
 }
 async function saveRemovedKeys() {
   try { await window.storage.set(REMOVED_KEY, JSON.stringify([...removedKeys]), false); } catch (e) {}
+  scheduleCloudPush();
 }
 
 function getAllMovies() {
@@ -2680,6 +2717,234 @@ function renderPosterSettings() {
 
 posterSettingsBtn.addEventListener('click', () => { buzz(8); renderPosterSettings(); });
 
+// ===== Cross-device sync (Supabase) =====
+function updateAccountButton() {
+  accountBtnLabel.textContent = currentUser ? 'Synced' : 'Sync';
+  accountBtn.classList.toggle('synced', !!currentUser);
+}
+
+function scheduleCloudPush() {
+  if (!sb || !currentUser) return;
+  clearTimeout(cloudPushTimer);
+  cloudPushTimer = setTimeout(pushToCloud, 1500);
+}
+
+async function pushToCloud() {
+  if (!sb || !currentUser) return;
+  const payload = {
+    state,
+    customMovies,
+    removedKeys: [...removedKeys],
+    hitMilestones: [...hitMilestones]
+  };
+  try {
+    await sb.from('user_data').upsert({
+      user_id: currentUser.id,
+      data: payload,
+      updated_at: new Date().toISOString()
+    });
+  } catch (e) { /* will retry on next change; local data is never at risk */ }
+}
+
+async function pullFromCloud() {
+  if (!sb || !currentUser) return null;
+  try {
+    const { data, error } = await sb.from('user_data').select('data').eq('user_id', currentUser.id).maybeSingle();
+    if (error || !data) return null;
+    return data.data;
+  } catch (e) { return null; }
+}
+
+function applyCloudData(cloud) {
+  state = cloud.state || {};
+  customMovies = Array.isArray(cloud.customMovies) ? cloud.customMovies : [];
+  removedKeys = new Set(Array.isArray(cloud.removedKeys) ? cloud.removedKeys : []);
+  hitMilestones = new Set(Array.isArray(cloud.hitMilestones) ? cloud.hitMilestones : []);
+  saveState();
+  saveCustomMovies();
+  saveRemovedKeys();
+  saveMilestones();
+  populateGenreOptions();
+  render();
+}
+
+function hasMeaningfulData(watched, customCount) {
+  return watched > 0 || customCount > 0;
+}
+
+// Called right after a successful sign-in: figures out whether this device's
+// data or the cloud's data should win, asking the person only when both
+// sides actually have something (so there's never a silent overwrite).
+async function handleFirstSyncAfterLogin() {
+  syncing = true;
+  showToast('Checking for synced data…', { duration: 2500 });
+  const cloud = await pullFromCloud();
+  const localWatchedCount = Object.values(state).filter(v => v && v.watched).length;
+  const localHasData = hasMeaningfulData(localWatchedCount, customMovies.length);
+
+  if (!cloud) {
+    // nothing in the cloud yet - seed it with whatever's on this device
+    await pushToCloud();
+    syncing = false;
+    showToast('This device is now the starting point for your synced data');
+    return;
+  }
+
+  const cloudWatchedCount = cloud.state ? Object.values(cloud.state).filter(v => v && v.watched).length : 0;
+  const cloudHasData = hasMeaningfulData(cloudWatchedCount, (cloud.customMovies || []).length);
+
+  if (cloudHasData && !localHasData) {
+    applyCloudData(cloud);
+    syncing = false;
+    showToast('Synced data loaded from your account');
+    return;
+  }
+  if (!cloudHasData) {
+    await pushToCloud();
+    syncing = false;
+    return;
+  }
+
+  // both sides have real data - don't guess, ask
+  const useCloud = await showConfirm(
+    `You have data both on this device and already synced to your account. Use the synced data (this device's current progress will be replaced), or keep this device's data (overwrites what's synced)?`,
+    'Use synced data'
+  );
+  if (useCloud) {
+    applyCloudData(cloud);
+    showToast('Synced data loaded');
+  } else {
+    await pushToCloud();
+    showToast("This device's data is now synced");
+  }
+  syncing = false;
+}
+
+async function initAuth() {
+  if (!sb) return;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session && session.user) {
+      currentUser = session.user;
+      updateAccountButton();
+      await handleFirstSyncAfterLogin();
+    }
+  } catch (e) { /* offline or Supabase unreachable - app still works locally */ }
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session && session.user && (!currentUser || currentUser.id !== session.user.id)) {
+      currentUser = session.user;
+      updateAccountButton();
+      await handleFirstSyncAfterLogin();
+      if (document.getElementById('accountEmailInput')) renderAccountSheet();
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      updateAccountButton();
+      if (document.getElementById('accountEmailInput') || document.getElementById('signOutBtn')) renderAccountSheet();
+    }
+  });
+}
+
+function renderAccountSheet() {
+  sheetContent.innerHTML = '';
+  const titleEl = document.createElement('div');
+  titleEl.className = 'sheet-title';
+  titleEl.textContent = '🔄 Sync Across Devices';
+  sheetContent.appendChild(titleEl);
+
+  if (!sb) {
+    const note = document.createElement('p');
+    note.className = 'settings-note';
+    note.textContent = "Sync isn't available right now (couldn't reach the sync service). Everything still saves normally on this device.";
+    sheetContent.appendChild(note);
+    openSheet();
+    return;
+  }
+
+  if (currentUser) {
+    const note = document.createElement('p');
+    note.className = 'settings-note';
+    note.innerHTML = `Signed in as <strong style="color:var(--cream)">${currentUser.email}</strong>. Your checkmarks, ratings, notes, and custom movies sync automatically whenever they change.`;
+    sheetContent.appendChild(note);
+
+    const actions = document.createElement('div');
+    actions.className = 'surprise-actions';
+    const syncNowBtn = document.createElement('button');
+    syncNowBtn.className = 'modal-btn cancel';
+    syncNowBtn.textContent = 'Sync now';
+    syncNowBtn.addEventListener('click', async () => {
+      buzz(8);
+      showToast('Syncing…', { duration: 1500 });
+      await pushToCloud();
+      showToast('Synced');
+    });
+    const signOutBtn = document.createElement('button');
+    signOutBtn.id = 'signOutBtn';
+    signOutBtn.className = 'modal-btn confirm';
+    signOutBtn.textContent = 'Sign out';
+    signOutBtn.addEventListener('click', async () => {
+      await sb.auth.signOut();
+      showToast('Signed out — this device keeps its data locally');
+      closeSheet();
+    });
+    actions.appendChild(syncNowBtn);
+    actions.appendChild(signOutBtn);
+    sheetContent.appendChild(actions);
+  } else {
+    const note = document.createElement('p');
+    note.className = 'settings-note';
+    note.textContent = "Sign in with your email to sync your list across your phone, tablet, and computer. No password needed — we'll email you a link.";
+    sheetContent.appendChild(note);
+
+    const field = document.createElement('div');
+    field.className = 'settings-field';
+    const label = document.createElement('label');
+    label.textContent = 'Email address';
+    label.setAttribute('for', 'accountEmailInput');
+    const input = document.createElement('input');
+    input.type = 'email';
+    input.id = 'accountEmailInput';
+    input.autocomplete = 'email';
+    input.placeholder = 'you@example.com';
+    field.appendChild(label);
+    field.appendChild(input);
+    sheetContent.appendChild(field);
+
+    const sendBtn = document.createElement('button');
+    sendBtn.className = 'submit-btn';
+    sendBtn.textContent = 'Send sign-in link';
+    sendBtn.style.marginTop = '4px';
+    sendBtn.addEventListener('click', async () => {
+      const email = input.value.trim();
+      if (!email || !email.includes('@')) { showToast('Enter a valid email'); input.focus(); return; }
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Sending…';
+      try {
+        const { error } = await sb.auth.signInWithOtp({
+          email,
+          options: { emailRedirectTo: window.location.href }
+        });
+        if (error) throw error;
+        sheetContent.innerHTML = '';
+        sheetContent.appendChild(titleEl);
+        const sent = document.createElement('p');
+        sent.className = 'settings-note';
+        sent.textContent = `Check ${email} for a sign-in link. Open it on this device (or any device) to finish signing in.`;
+        sheetContent.appendChild(sent);
+      } catch (e) {
+        showToast('Could not send the link — check the email and try again');
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Send sign-in link';
+      }
+    });
+    sheetContent.appendChild(sendBtn);
+  }
+
+  openSheet();
+}
+
+accountBtn.addEventListener('click', () => { buzz(8); renderAccountSheet(); });
+
 function updateStats() {
   const all = getAllMovies();
   const total = all.length;
@@ -3230,7 +3495,7 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
-loadState();
+loadState().then(() => initAuth());
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
